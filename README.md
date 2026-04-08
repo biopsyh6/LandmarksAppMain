@@ -1,0 +1,2 @@
+# LandmarksAppMain
+Project for diploma
