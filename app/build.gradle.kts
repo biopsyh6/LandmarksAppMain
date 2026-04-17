@@ -36,10 +36,25 @@ android {
     }
     buildFeatures {
         compose = true
+        mlModelBinding = true
     }
 }
 
 dependencies {
+
+    implementation(project(":domain"))
+    implementation(project(":data"))
+
+//    implementation(libs.tensorflow.lite)
+    implementation(libs.tensorflow.lite.support)
+    implementation(libs.tensorflow.lite.metadata)
+//    implementation(libs.tensorflow.lite.task.vision)
+
+//    implementation(libs.litert)
+//    implementation(libs.litert.support)
+//    implementation(libs.litert.metadata)
+//    implementation(libs.litert.tensorflow.compat)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -56,3 +71,27 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
+
+
+
+//configurations.all {
+//    exclude(group = "org.tensorflow", module = "tensorflow-lite-api")
+//    exclude(group = "org.tensorflow", module = "tensorflow-lite-support-api")
+//    exclude(group = "org.tensorflow", module = "tensorflow-lite-runtime")
+//    exclude(group = "com.google.ai.edge.litert", module = "litert-api")
+//    exclude(group = "com.google.ai.edge.litert", module = "litert-support-api")
+//}
+
+//configurations.all {
+//    resolutionStrategy.dependencySubstitution {
+//        substitute(module("org.tensorflow:tensorflow-lite"))
+//            .using(module("com.google.ai.edge.litert:litert:1.0.1"))
+//        substitute(module("org.tensorflow:tensorflow-lite-support"))
+//            .using(module("com.google.ai.edge.litert:litert-support:1.0.1"))
+//        substitute(module("org.tensorflow:tensorflow-lite-metadata"))
+//            .using(module("com.google.ai.edge.litert:litert-metadata:1.0.1"))
+//    }
+//
+//    exclude(group = "com.google.ai.edge.litert", module = "litert-support-api")
+//    exclude(group = "com.google.ai.edge.litert", module = "litert-api")
+//}
