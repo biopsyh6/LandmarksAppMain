@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">LandmarksApp</string>
+
+    <string name="error_no_internet">Проблемы с интернетом. Проверьте подключение.</string>
+    <string name="error_no_auth">Требуется авторизация.</string>
+    <string name="error_not_found">Данные не найдены.</string>
+    <string name="error_server">Ошибка на стороне сервера. Попробуйте позже.</string>
+    <string name="error_weak_password">Пароль слишком простой. Используйте минимум 6 символов.</string>
+    <string name="error_user_exists">Пользователь с таким email уже зарегистрирован.</string>
+    <string name="error_invalid_credentials">Неверный логин или пароль.</string>
+    <string name="error_unknown">Произошла непредвиденная ошибка.</string>
+
+    <string name="error_passwords_dont_match">Пароли не совпадают</string>
+    <string name="success_reset_link_sent">Ссылка для сброса пароля отправлена на почту</string>
+    <string name="error_invalid_email">Введите корректный адрес электронной почты</string>
+
 </resources>

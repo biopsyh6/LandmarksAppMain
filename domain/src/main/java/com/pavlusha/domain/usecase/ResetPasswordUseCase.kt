@@ -10,9 +10,9 @@ class ResetPasswordUseCase(
     suspend operator fun invoke(
         email: String
     ): TResult<Unit, AppExceptionDomainModel> {
-        if (!email.contains("@")) {
+        if (!email.contains("@") || email.length < 5) {
             return TResult.Error(
-                AppExceptionDomainModel.Other(Exception("Invalid email format"))
+                AppExceptionDomainModel.InvalidEmail(Exception("Invalid email format"))
             )
         }
 

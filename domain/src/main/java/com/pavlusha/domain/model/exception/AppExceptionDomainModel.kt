@@ -11,4 +11,5 @@ sealed class AppExceptionDomainModel(exception: Throwable) : Throwable(exception
     data class WeakPassword(val e: Throwable) : AppExceptionDomainModel(e)
     data class UserAlreadyExists(val e: Throwable) : AppExceptionDomainModel(e)
     data class InvalidCredentials(val e: Throwable) : AppExceptionDomainModel(e)
+    data class InvalidEmail(val e: Throwable) : AppExceptionDomainModel(e)
 }

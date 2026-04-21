@@ -43,7 +43,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.navigation
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.pavlusha.landmarksapp.ml.Model
+import com.pavlusha.landmarksapp.ui.screens.LoginScreen
+import com.pavlusha.landmarksapp.ui.screens.MainTabsScreen
+import com.pavlusha.landmarksapp.ui.screens.RegisterScreen
+import com.pavlusha.landmarksapp.ui.screens.ResetPasswordScreen
 import com.pavlusha.landmarksapp.ui.theme.LandmarksAppTheme
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
@@ -88,20 +98,21 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             LandmarksAppTheme {
-                LandmarkClassifierScreen(
-                    imageBitmap = imageBitmap,
-                    result = classificationResult,
-                    onTakePictureClick = {
-                        if (hasCameraPermission()) {
-                            cameraLauncher.launch(null)
-                        } else {
-                            requestCameraPermission()
-                        }
-                    },
-                    onOpenGalleryClick = {
-                        galleryLauncher.launch("image/*")
-                    }
-                )
+                Main()
+//                LandmarkClassifierScreen(
+//                    imageBitmap = imageBitmap,
+//                    result = classificationResult,
+//                    onTakePictureClick = {
+//                        if (hasCameraPermission()) {
+//                            cameraLauncher.launch(null)
+//                        } else {
+//                            requestCameraPermission()
+//                        }
+//                    },
+//                    onOpenGalleryClick = {
+//                        galleryLauncher.launch("image/*")
+//                    }
+//                )
             }
         }
     }
@@ -277,6 +288,34 @@ fun LandmarkClassifierScreen(
             )
         }
         Spacer(modifier = Modifier.height(32.dp))
+    }
+}
+
+@Composable
+fun Main() {
+    val rootNavController = rememberNavController()
+
+    NavHost(
+        navController = rootNavController,
+        startDestination = "auth"
+    ) {
+        navigation(route = "auth", startDestination = "login") {
+            composable("login") { LoginScreen(rootNavController) }
+            composable("register") { RegisterScreen(rootNavController) }
+            composable("reset_password") { ResetPasswordScreen(rootNavController) }
+        }
+
+        composable("main_content") {
+            MainTabsScreen(rootNavController)
+        }
+
+//        composable(
+//            route = "landmark_details/{landmarkId}",
+//            arguments = listOf(navArgument("landmarkId") { type = NavType.StringType })
+//            ) { backStackEntry ->
+//            val id = backStackEntry.arguments?.getString("landmarkId") ?: ""
+//            LandmarkDetailsScreen(id, rootNavController)
+//        }
     }
 }
 
