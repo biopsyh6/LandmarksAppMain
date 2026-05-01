@@ -3,9 +3,10 @@ package com.pavlusha.domain.repository
 import com.pavlusha.domain.TResult
 import com.pavlusha.domain.model.UserDomainModel
 import com.pavlusha.domain.model.exception.AppExceptionDomainModel
+import kotlinx.coroutines.flow.Flow
 
 interface IAuthRepository {
-//    fun observeAuthState(): Flow<UserDomainModel?>
+    fun observeAuthState(): Flow<UserDomainModel?>
 
     suspend fun getCurrentUser(): UserDomainModel?
 

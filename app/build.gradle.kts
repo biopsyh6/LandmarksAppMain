@@ -1,8 +1,21 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     id("com.google.gms.google-services")
+    id("com.google.devtools.ksp")
 }
+
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(FileInputStream(localPropertiesFile))
+}
+
+val mapkitKey = localProperties.getProperty("MAPKIT_API_KEY") ?: ""
+
 
 android {
     namespace = "com.pavlusha.landmarksapp"
@@ -14,12 +27,14 @@ android {
 
     defaultConfig {
         applicationId = "com.pavlusha.landmarksapp"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField ("String", "MAPKIT_API_KEY", "\"$mapkitKey\"")
     }
 
     buildTypes {
@@ -36,13 +51,21 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
     buildFeatures {
+        buildConfig = true
         compose = true
         mlModelBinding = true
     }
 }
 
 dependencies {
+    implementation("com.yandex.android:maps.mobile:4.33.1-full")
     implementation("androidx.compose.material:material-icons-extended")
+    implementation(libs.androidx.material3)
+    implementation(libs.coil.compose)
+
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
 
     implementation (libs.koin.android)
     implementation (libs.koin.androidx.navigation)

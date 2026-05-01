@@ -4,5 +4,7 @@ data class UserLocationDomainModel(
     val latitude: Double,
     val longitude: Double,
     val accuracy: Float,
-    val timestamp: Long
+    val bearing: Float? = null, // направление взгляда
+    val timestamp: Long,
+    val altitude: Double? = null,
 )

@@ -49,7 +49,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.pavlusha.domain.model.LandmarkSource
 import com.pavlusha.landmarksapp.ml.Model
+import com.pavlusha.landmarksapp.ui.screens.LandmarkDetailsScreen
 import com.pavlusha.landmarksapp.ui.screens.LoginScreen
 import com.pavlusha.landmarksapp.ui.screens.MainTabsScreen
 import com.pavlusha.landmarksapp.ui.screens.RegisterScreen
@@ -307,6 +309,25 @@ fun Main() {
 
         composable("main_content") {
             MainTabsScreen(rootNavController)
+        }
+
+        composable(
+            route = "details_screen/{landmarkId}/{source}",
+            arguments = listOf(
+                navArgument("landmarkId") { type = NavType.StringType },
+                navArgument("source") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val rawId = backStackEntry.arguments?.getString("landmarkId") ?: ""
+            val landmarkId = Uri.decode(rawId)
+            val sourceString = backStackEntry.arguments?.getString("source") ?: ""
+            val source = LandmarkSource.valueOf(sourceString)
+
+            LandmarkDetailsScreen(
+                landmarkId = landmarkId,
+                source = source,
+                onNavigateBack = { rootNavController.popBackStack() }
+            )
         }
 
 //        composable(

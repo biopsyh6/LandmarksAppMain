@@ -2,6 +2,7 @@ package com.pavlusha.landmarksapp.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -67,10 +68,10 @@ fun MainTabsScreen(rootNavController: NavController) {
         NavHost(
             navController = tabsNavController,
             startDestination = Destination.EXPLORE.route,
-            modifier = Modifier.padding(paddingValues)
+            modifier = Modifier.fillMaxSize()
         ) {
             composable(Destination.EXPLORE.route) {
-                ExploreLandmarksScreen(rootNavController)
+                ExploreMapScreen(rootNavController, paddingValues)
             }
 //            composable(Destination.FAVOURITES.route) {
 //                FavoriteLandmarksScreen(rootNavController)

@@ -63,7 +63,8 @@ fun RegisterScreen(
         viewModel.event.collect { event ->
             when (event) {
                 is AuthEvent.ShowToast -> {
-                    Toast.makeText(context, context.getString(event.message), Toast.LENGTH_SHORT)
+                    val text = context.resources.getString(event.message)
+                    Toast.makeText(context, text, Toast.LENGTH_SHORT)
                         .show()
                 }
 

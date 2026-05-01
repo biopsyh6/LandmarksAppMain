@@ -14,4 +14,14 @@
     <string name="success_reset_link_sent">Ссылка для сброса пароля отправлена на почту</string>
     <string name="error_invalid_email">Введите корректный адрес электронной почты</string>
 
+    <string name="error_access_denied">Нет разрешения на доступ к местоположению. Пожалуйста, включите его в настройках.</string>
+    <string name="error_location_disabled">Геолокация на устройстве выключена. Включите GPS для работы с картой.</string>
+
+    <string name="error_download_failed">Не удалось загрузить данные. Проверьте сеть.</string>
+    <string name="error_insufficient_storage">Недостаточно места на устройстве для загрузки карт или моделей.</string>
+    <string name="error_model_failed">Ошибка при анализе изображения. Попробуйте еще раз.</string>
+
+    <string name="error_empty_search">По вашему запросу ничего не найдено. Попробуйте изменить фильтры или текст.</string>
+    <string name="error_search_limit">Превышен лимит запросов на поиск. Попробуйте позже.</string>
+
 </resources>

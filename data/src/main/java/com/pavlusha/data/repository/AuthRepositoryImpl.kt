@@ -7,11 +7,29 @@ import com.pavlusha.domain.TResult
 import com.pavlusha.domain.model.UserDomainModel
 import com.pavlusha.domain.model.exception.AppExceptionDomainModel
 import com.pavlusha.domain.repository.IAuthRepository
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 class AuthRepositoryImpl(
     private val firebaseAuth: FirebaseAuth
 ) : IAuthRepository {
+    override fun observeAuthState(): Flow<UserDomainModel?> = callbackFlow {
+        val authStateListener = FirebaseAuth.AuthStateListener { auth ->
+            val userDomain = auth.currentUser?.let {
+                UserDataMapper.toDomainFromFirebase(it)
+            }
+
+            trySend(userDomain)
+        }
+
+        firebaseAuth.addAuthStateListener(authStateListener)
+        awaitClose {
+            firebaseAuth.removeAuthStateListener(authStateListener)
+        }
+    }
+
 
     override suspend fun getCurrentUser(): UserDomainModel? {
         return firebaseAuth.currentUser?.let {

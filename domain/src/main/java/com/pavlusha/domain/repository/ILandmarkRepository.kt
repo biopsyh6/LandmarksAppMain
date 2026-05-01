@@ -2,8 +2,10 @@ package com.pavlusha.domain.repository
 
 import com.pavlusha.domain.TResult
 import com.pavlusha.domain.model.LandmarkDomainModel
+import com.pavlusha.domain.model.RecognitionResultDomainModel
 import com.pavlusha.domain.model.RegionPackageDomainModel
 import com.pavlusha.domain.model.exception.AppExceptionDomainModel
+import kotlinx.coroutines.flow.Flow
 
 interface ILandmarkRepository {
     suspend fun getNearbyLandmarks(
@@ -16,6 +18,10 @@ interface ILandmarkRepository {
         id: String
     ): TResult<LandmarkDomainModel, AppExceptionDomainModel>
 
+    suspend fun getLandmarkByRecognition(
+        result: RecognitionResultDomainModel
+    ): TResult<LandmarkDomainModel, AppExceptionDomainModel>
+
     suspend fun toggleFavourite(
         landmarkId: String,
         isFavourite: Boolean,
@@ -24,4 +30,10 @@ interface ILandmarkRepository {
     suspend fun getAvailableRegions(): TResult<List<RegionPackageDomainModel>, AppExceptionDomainModel>
 
     suspend fun deleteRegion(regionId: String): TResult<Unit, AppExceptionDomainModel>
+
+    suspend fun searchLandmarks(query: String): TResult<List<LandmarkDomainModel>, AppExceptionDomainModel>
+
+    fun downloadRegion(regionId: String): Flow<TResult<Float, AppExceptionDomainModel>>
+
+    suspend fun getDownloadedRegions(): TResult<List<RegionPackageDomainModel>, AppExceptionDomainModel>
 }

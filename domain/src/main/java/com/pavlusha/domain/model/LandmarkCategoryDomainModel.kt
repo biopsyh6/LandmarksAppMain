@@ -5,7 +5,8 @@ data class LandmarkCategoryDomainModel(
     val name: String,
     val iconName: String,
     val colorHex: String,
-    val type: CategoryType
+    val type: CategoryType,
+    val rawTypeName: String,
 )
 
 enum class CategoryType {

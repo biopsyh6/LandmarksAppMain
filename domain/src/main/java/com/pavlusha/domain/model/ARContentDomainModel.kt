@@ -15,6 +15,8 @@ data class ARContentDomainModel(
     val showDistance: Boolean = true,
     val showCategory: Boolean = true,
     val showPeriodName: Boolean = true,
+
+    val isModelLoaded: Boolean = false
 )
 
 enum class ARDisplayMode {
