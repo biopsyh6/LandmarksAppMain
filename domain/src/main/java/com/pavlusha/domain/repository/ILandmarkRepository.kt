@@ -27,13 +27,5 @@ interface ILandmarkRepository {
         isFavourite: Boolean,
     ): TResult<Unit, AppExceptionDomainModel>
 
-    suspend fun getAvailableRegions(): TResult<List<RegionPackageDomainModel>, AppExceptionDomainModel>
-
-    suspend fun deleteRegion(regionId: String): TResult<Unit, AppExceptionDomainModel>
-
     suspend fun searchLandmarks(query: String): TResult<List<LandmarkDomainModel>, AppExceptionDomainModel>
-
-    fun downloadRegion(regionId: String): Flow<TResult<Float, AppExceptionDomainModel>>
-
-    suspend fun getDownloadedRegions(): TResult<List<RegionPackageDomainModel>, AppExceptionDomainModel>
 }

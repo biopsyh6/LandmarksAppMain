@@ -41,4 +41,23 @@ class YandexSearchDataSource(
 
             continuation.invokeOnCancellation { session.cancel() }
         }
+
+    suspend fun fetchLandmarkDetailsByUri(uri: String): GeoObject? =
+        suspendCancellableCoroutine { continuation ->
+            val session = searchManager.resolveURI(
+                uri,
+                SearchOptions(),
+                object : Session.SearchListener {
+                    override fun onSearchResponse(response: Response) {
+                        val geoObject = response.collection.children.firstOrNull()?.obj
+                        continuation.resume(geoObject)
+                    }
+
+                    override fun onSearchError(error: Error) {
+                        continuation.resumeWithException(Exception("Yandex URI Error: $error"))
+                    }
+                }
+            )
+            continuation.invokeOnCancellation { session.cancel() }
+        }
 }

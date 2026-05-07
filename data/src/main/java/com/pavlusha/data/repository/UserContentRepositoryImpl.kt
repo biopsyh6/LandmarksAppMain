@@ -1,0 +1,142 @@
+package com.pavlusha.data.repository
+
+import com.google.firebase.auth.FirebaseAuth
+import com.pavlusha.data.local.dao.UserContentDao
+import com.pavlusha.data.mapper.UserContentLocalDataMapper
+import com.pavlusha.data.mapper.exception.toAppExceptionDomainModel
+import com.pavlusha.data.mapper.remote.UserContentRemoteDataMapper
+import com.pavlusha.data.remote.LocalPhotoStorageDataSource
+import com.pavlusha.data.remote.UserRemoteDataSource
+import com.pavlusha.domain.TResult
+import com.pavlusha.domain.model.UserARPhotoDomainModel
+import com.pavlusha.domain.model.UserNoteDomainModel
+import com.pavlusha.domain.model.VisitHistoryDomainModel
+import com.pavlusha.domain.model.exception.AppExceptionDomainModel
+import com.pavlusha.domain.repository.IUserContentRepository
+import java.io.File
+import java.util.UUID
+
+class UserContentRepositoryImpl(
+    private val userContentDao: UserContentDao,
+    private val userRemoteDataSource: UserRemoteDataSource,
+    private val photoStorageDataSource: LocalPhotoStorageDataSource,
+    private val firebaseAuth: FirebaseAuth
+) : IUserContentRepository {
+    override suspend fun saveNote(note: UserNoteDomainModel): TResult<Unit, AppExceptionDomainModel> {
+        return try {
+            val localEntity = UserContentLocalDataMapper.fromDomainToData(note)
+            userContentDao.insertNote(localEntity)
+
+            val userId = firebaseAuth.currentUser?.uid
+            if (userId != null) {
+                val remoteModel = UserContentRemoteDataMapper.fromDomainToData(note)
+                userRemoteDataSource.saveUserNote(userId, remoteModel)
+            }
+
+            TResult.Success(Unit)
+        } catch (e: Exception) {
+            TResult.Error(e.toAppExceptionDomainModel())
+        }
+    }
+
+    override suspend fun getNotesForLandmark(landmarkId: String): TResult<List<UserNoteDomainModel>, AppExceptionDomainModel> {
+        return try {
+            val userId = firebaseAuth.currentUser?.uid
+
+            if (userId != null) {
+                try {
+                    val remoteNotes = userRemoteDataSource.getUserNotes(userId)
+                    val landmarkNotesRemote = remoteNotes.filter { it.landmarkId == landmarkId }
+
+                    val entitiesToSave = landmarkNotesRemote.map { remoteModel ->
+                        val domainModel = UserContentRemoteDataMapper.toDomainFromData(remoteModel)
+                        UserContentLocalDataMapper.fromDomainToData(domainModel)
+                    }
+                    if (entitiesToSave.isNotEmpty()) {
+                        userContentDao.insertNotes(entitiesToSave)
+                    }
+                } catch (e: Exception) {
+
+                }
+            }
+
+            val localNotes = userContentDao.getNotesByLandmarkId(landmarkId)
+            val domainNotes = localNotes.map { UserContentLocalDataMapper.toDomainFromData(it) }
+
+            TResult.Success(domainNotes)
+        } catch (e: Exception) {
+            TResult.Error(e.toAppExceptionDomainModel())
+        }
+    }
+
+    override suspend fun addToHistory(visit: VisitHistoryDomainModel): TResult<Unit, AppExceptionDomainModel> {
+        return try {
+            val localEntity = UserContentLocalDataMapper.fromDomainToData(visit)
+            userContentDao.insertVisit(localEntity)
+
+            val userId = firebaseAuth.currentUser?.uid
+            if (userId != null) {
+                val remoteModel = UserContentRemoteDataMapper.fromDomainToData(visit)
+                userRemoteDataSource.saveVisitHistory(userId, remoteModel)
+            }
+
+            TResult.Success(Unit)
+        } catch (e: Exception) {
+            TResult.Error(e.toAppExceptionDomainModel())
+        }
+    }
+
+    override suspend fun saveARPhoto(
+        landmarkId: String,
+        imageBytes: ByteArray
+    ): TResult<UserARPhotoDomainModel, AppExceptionDomainModel> {
+        return try {
+            val savedFilePath = photoStorageDataSource.savePhoto(imageBytes)
+
+            val domainModel = UserARPhotoDomainModel(
+                id = UUID.randomUUID().toString(),
+                landmarkId = landmarkId,
+                localFilePath = savedFilePath,
+                remoteUrl = null,
+                createdAt = System.currentTimeMillis()
+            )
+
+            val entity = UserContentLocalDataMapper.fromDomainToData(domainModel)
+            userContentDao.insertARPhoto(entity)
+
+            TResult.Success(domainModel)
+        } catch (e: Exception) {
+            TResult.Error(e.toAppExceptionDomainModel())
+        }
+    }
+
+    override suspend fun getUserGallery(): TResult<List<UserARPhotoDomainModel>, AppExceptionDomainModel> {
+        return try {
+            val localPhotos = userContentDao.getAllARPhotos()
+            val domainPhotos = localPhotos.map { UserContentLocalDataMapper.toDomainFromData(it) }
+
+            TResult.Success(domainPhotos)
+        } catch (e: Exception) {
+            TResult.Error(e.toAppExceptionDomainModel())
+        }
+    }
+
+    override suspend fun deleteARPhoto(photoId: String): TResult<Unit, AppExceptionDomainModel> {
+        return try {
+            val photoEntity = userContentDao.getARPhotoById(photoId)
+
+            if (photoEntity != null) {
+                val file = File(photoEntity.localFilePath)
+                if (file.exists()) {
+                    file.delete()
+                }
+
+                userContentDao.deleteARPhotoById(photoId)
+            }
+
+            TResult.Success(Unit)
+        } catch (e: Exception) {
+            TResult.Error(e.toAppExceptionDomainModel())
+        }
+    }
+}

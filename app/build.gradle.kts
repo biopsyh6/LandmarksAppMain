@@ -63,6 +63,10 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.coil.compose)
 
+    implementation(libs.retrofit)
+
+    implementation(libs.converter.gson)
+
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
@@ -74,6 +78,8 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.storage)
 
     implementation(project(":domain"))
     implementation(project(":data"))

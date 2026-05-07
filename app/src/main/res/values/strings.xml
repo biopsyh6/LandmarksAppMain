@@ -24,4 +24,9 @@
     <string name="error_empty_search">По вашему запросу ничего не найдено. Попробуйте изменить фильтры или текст.</string>
     <string name="error_search_limit">Превышен лимит запросов на поиск. Попробуйте позже.</string>
 
+
+
+
+    <string name="arrived_message">Вы прибыли.</string>
+
 </resources>

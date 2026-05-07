@@ -1,9 +1,9 @@
 package com.pavlusha.domain.usecase
 
-import com.pavlusha.domain.repository.ILandmarkRepository
+import com.pavlusha.domain.repository.IRegionRepository
 
 class GetDownloadedRegionsUseCase(
-    private val repository: ILandmarkRepository
+    private val repository: IRegionRepository
 ) {
     suspend operator fun invoke() = repository.getDownloadedRegions()
 }

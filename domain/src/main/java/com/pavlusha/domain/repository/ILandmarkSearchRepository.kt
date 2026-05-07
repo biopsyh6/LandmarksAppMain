@@ -5,6 +5,7 @@ import com.pavlusha.domain.model.LandmarkDomainModel
 import com.pavlusha.domain.model.LandmarkSource
 import com.pavlusha.domain.model.SearchResultDomainModel
 import com.pavlusha.domain.model.UserLocationDomainModel
+import com.pavlusha.domain.model.WikipediaInfoDomainModel
 import com.pavlusha.domain.model.exception.AppExceptionDomainModel
 
 interface ILandmarkSearchRepository {
@@ -23,4 +24,8 @@ interface ILandmarkSearchRepository {
         id: String,
         source: LandmarkSource
     ): TResult<LandmarkDomainModel, AppExceptionDomainModel>
+
+    suspend fun getWikipediaDescription(
+        landmarkName: String
+    ): TResult<WikipediaInfoDomainModel, AppExceptionDomainModel>
 }

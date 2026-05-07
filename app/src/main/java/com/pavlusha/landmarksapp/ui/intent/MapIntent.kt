@@ -9,7 +9,8 @@ sealed interface MapIntent {
     data object OnMapInitialized : MapIntent
     data class OnMapCameraMoved(
         val latitude: Double,
-        val longitude: Double
+        val longitude: Double,
+        val zoom: Float
     ) : MapIntent
 
     data class OnSearchQueryChanged(val query: String) : MapIntent
@@ -18,5 +19,6 @@ sealed interface MapIntent {
     data class OnLandmarkClicked(val landmark: SearchResultDomainModel) : MapIntent
     data object OnCloseLandmarkInfo : MapIntent
     data class OnLandmarkDetailsClicked(val landmark: SearchResultDomainModel) : MapIntent
-
+    data object OnBuildRouteClicked : MapIntent
+    data object OnCancelRouteClicked : MapIntent
 }

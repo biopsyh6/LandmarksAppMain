@@ -36,13 +36,15 @@ val appModule = module {
             getUserLocationUseCase = get(),
             searchLandmarksUseCase = get(),
             searchLandmarksAtPointUseCase = get(),
-            ioDispatcher = get()
+            ioDispatcher = get(),
+            getPedestrianRouteUseCase = get()
         )
     }
 
     viewModel<LandmarkDetailsViewModel> {
         LandmarkDetailsViewModel(
-            getLandmarkDetailsUseCase = get()
+            getLandmarkDetailsUseCase = get(),
+            getWikipediaInfoUseCase = get()
         )
     }
 }

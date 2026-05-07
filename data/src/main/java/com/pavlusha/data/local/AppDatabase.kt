@@ -2,7 +2,11 @@ package com.pavlusha.data.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import com.pavlusha.data.local.dao.ARContentDao
+import com.pavlusha.data.local.dao.GeoFenceDao
 import com.pavlusha.data.local.dao.LandmarkDao
+import com.pavlusha.data.local.dao.UserContentDao
+import com.pavlusha.data.local.dao.UserDao
 import com.pavlusha.data.local.entity.ARAnnotationEntity
 import com.pavlusha.data.local.entity.ARContentConfigEntity
 import com.pavlusha.data.local.entity.ExternalInfoEntity
@@ -13,6 +17,7 @@ import com.pavlusha.data.local.entity.LandmarkGalleryEntity
 import com.pavlusha.data.local.entity.LandmarkSourceUrlEntity
 import com.pavlusha.data.local.entity.LandmarkTagEntity
 import com.pavlusha.data.local.entity.RegionPackageEntity
+import com.pavlusha.data.local.entity.UserARPhotoEntity
 import com.pavlusha.data.local.entity.UserEntity
 import com.pavlusha.data.local.entity.UserNoteEntity
 import com.pavlusha.data.local.entity.VisitHistoryEntity
@@ -32,10 +37,15 @@ import com.pavlusha.data.local.entity.VisitHistoryEntity
         ARContentConfigEntity::class,
         GeoFenceEntity::class,
         UserEntity::class,
+        UserARPhotoEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun landmarkDao(): LandmarkDao
+    abstract fun userDao(): UserDao
+    abstract fun userContentDao(): UserContentDao
+    abstract fun arContentDao(): ARContentDao
+    abstract fun geoFenceDao(): GeoFenceDao
 }

@@ -1,11 +1,13 @@
 package com.pavlusha.landmarksapp.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pavlusha.domain.TResult
 import com.pavlusha.domain.model.LandmarkSource
 import com.pavlusha.domain.model.exception.AppExceptionDomainModel
 import com.pavlusha.domain.usecase.GetLandmarkDetailsUseCase
+import com.pavlusha.domain.usecase.GetWikipediaInfoUseCase
 import com.pavlusha.landmarksapp.R
 import com.pavlusha.landmarksapp.ui.SingleFlowEvent
 import com.pavlusha.landmarksapp.ui.event.LandmarkDetailsEvent
@@ -19,7 +21,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class LandmarkDetailsViewModel(
-    private val getLandmarkDetailsUseCase: GetLandmarkDetailsUseCase
+    private val getLandmarkDetailsUseCase: GetLandmarkDetailsUseCase,
+    private val getWikipediaInfoUseCase: GetWikipediaInfoUseCase
 ) : ViewModel() {
     private val _state = MutableStateFlow(LandmarkDetailsState())
     val state: StateFlow<LandmarkDetailsState> = _state.asStateFlow()
@@ -49,13 +52,29 @@ class LandmarkDetailsViewModel(
                     _state.update {
                         it.copy(isLoading = false, landmark = result.data)
                     }
+                    loadWikipediaInfo(result.data.name)
                 }
                 is TResult.Error -> {
-                    val errorRes = (result.exception as? AppExceptionDomainModel)?.parseToResource()
+                    val errorRes = result.exception?.parseToResource()
                         ?: R.string.error_unknown
 
                     _state.update { it.copy(isLoading = false, error = errorRes) }
                     _event.emit(LandmarkDetailsEvent.ShowToast(errorRes))
+                }
+            }
+        }
+    }
+
+    private fun loadWikipediaInfo(landmarkName: String) {
+        _state.update { it.copy(isWikiLoading = true) }
+        viewModelScope.launch {
+            val result = getWikipediaInfoUseCase(landmarkName)
+            when (result) {
+                is TResult.Success -> {
+                    _state.update { it.copy(isWikiLoading = false, wikipediaInfo = result.data) }
+                }
+                is TResult.Error -> {
+                    _state.update { it.copy(isWikiLoading = false) }
                 }
             }
         }

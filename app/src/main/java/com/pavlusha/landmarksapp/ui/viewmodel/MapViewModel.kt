@@ -1,10 +1,12 @@
 package com.pavlusha.landmarksapp.ui.viewmodel
 
+import android.location.Location
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pavlusha.domain.TResult
 import com.pavlusha.domain.model.SearchResultDomainModel
 import com.pavlusha.domain.model.exception.AppExceptionDomainModel
+import com.pavlusha.domain.usecase.GetPedestrianRouteUseCase
 import com.pavlusha.domain.usecase.GetUserLocationUseCase
 import com.pavlusha.domain.usecase.ObserveUserLocationUseCase
 import com.pavlusha.domain.usecase.SearchLandmarksAtPointUseCase
@@ -13,6 +15,7 @@ import com.pavlusha.landmarksapp.R
 import com.pavlusha.landmarksapp.ui.SingleFlowEvent
 import com.pavlusha.landmarksapp.ui.event.MapEvent
 import com.pavlusha.landmarksapp.ui.intent.MapIntent
+import com.pavlusha.landmarksapp.ui.state.CameraPositionData
 import com.pavlusha.landmarksapp.ui.state.MapState
 import com.pavlusha.landmarksapp.util.parseToResource
 import kotlinx.coroutines.CoroutineDispatcher
@@ -30,6 +33,7 @@ class MapViewModel(
     private val getUserLocationUseCase: GetUserLocationUseCase,
     private val searchLandmarksUseCase: SearchLandmarksUseCase,
     private val searchLandmarksAtPointUseCase: SearchLandmarksAtPointUseCase,
+    private val getPedestrianRouteUseCase: GetPedestrianRouteUseCase,
     private val ioDispatcher: CoroutineDispatcher
 ) : ViewModel() {
     private val _state = MutableStateFlow(MapState())
@@ -46,19 +50,39 @@ class MapViewModel(
             is MapIntent.OnMyLocationClicked -> handleMyLocationClicked()
             is MapIntent.StartTracking -> _state.update { it.copy(isTrackingActive = true) }
             is MapIntent.StopTracking -> _state.update { it.copy(isTrackingActive = false) }
-            is MapIntent.OnMapCameraMoved -> handleCameraMoved()
+            is MapIntent.OnMapCameraMoved -> {
+                _state.update {
+                    it.copy(
+                        lastCameraPosition = CameraPositionData(
+                            latitude = intent.latitude,
+                            longitude = intent.longitude,
+                            zoom = intent.zoom
+                        )
+                    )
+                }
+            }
             is MapIntent.OnSearchQueryChanged -> {
                 _state.update { it.copy(searchQuery = intent.query) }
             }
             is MapIntent.OnSearchExecute -> handleTextSearch()
             is MapIntent.OnSearchNearby -> handleNearbySearch()
             is MapIntent.OnLandmarkClicked -> {
-                _state.update { it.copy(selectedLandmark = intent.landmark) }
+                val loc = state.value.userLocation
+                val dist = if (loc != null) {
+                    val results = FloatArray(1)
+                    Location.distanceBetween(loc.latitude, loc.longitude, intent.landmark.latitude, intent.landmark.longitude, results)
+                    results[0]
+                } else null
+                _state.update { it.copy(selectedLandmark = intent.landmark, distanceToSelected = dist) }
             }
             is MapIntent.OnCloseLandmarkInfo -> {
-                _state.update { it.copy(selectedLandmark = null) }
+                _state.update { it.copy(selectedLandmark = null, currentRoute = null) }
             }
             is MapIntent.OnLandmarkDetailsClicked -> handleLandmarkDetailsClicked(intent.landmark)
+            is MapIntent.OnBuildRouteClicked -> handleBuildRouteClicked()
+            is MapIntent.OnCancelRouteClicked -> {
+                _state.update { it.copy(currentRoute = null) }
+            }
         }
     }
 
@@ -130,14 +154,38 @@ class MapViewModel(
                     _event.emit(MapEvent.ShowToast(errorRes))
                 }
                 .collect { location ->
+                    val currentState = _state.value
+                    var newDistance: Float? = currentState.distanceToSelected
+                    var routeFinished = false
+
+                    currentState.selectedLandmark?.let { target ->
+                        val results = FloatArray(1)
+                        Location.distanceBetween(
+                            location.latitude, location.longitude,
+                            target.latitude, target.longitude,
+                            results
+                        )
+                        newDistance = results[0]
+
+                        if (currentState.currentRoute != null && newDistance!! < 20f) {
+                            routeFinished = true
+                        }
+                    }
+
                     _state.update {
                         it.copy(
                             userLocation = location,
+                            distanceToSelected = newDistance,
+                            currentRoute = if (routeFinished) null else it.currentRoute,
                             isLoading = false,
                             isTrackingActive = if (it.isFirstLocationFix) true else it.isTrackingActive,
                             isFirstLocationFix = false,
                             error = null
                         )
+                    }
+
+                    if (routeFinished) {
+                        _event.emit(MapEvent.ShowToast(R.string.arrived_message))
                     }
                 }
         }
@@ -158,15 +206,42 @@ class MapViewModel(
         }
     }
 
-    private fun handleCameraMoved() {
-        if (state.value.isTrackingActive) {
-            _state.update { it.copy(isTrackingActive = false) }
-        }
-    }
-
     private fun handleLandmarkDetailsClicked(landmark: SearchResultDomainModel) {
         viewModelScope.launch {
             _event.emit(MapEvent.NavigateToLandmarkDetails(landmark.id, landmark.source))
+        }
+    }
+
+    private fun handleBuildRouteClicked() {
+        val destination = state.value.selectedLandmark ?: return
+        val startLoc = state.value.userLocation
+
+        if (startLoc == null) {
+            viewModelScope.launch {
+                _event.emit(MapEvent.ShowToast(R.string.error_unknown))
+            }
+            return
+        }
+
+        _state.update { it.copy(isLoading = true) }
+
+        viewModelScope.launch {
+            val result = getPedestrianRouteUseCase(
+                startLat = startLoc.latitude,
+                startLon = startLoc.longitude,
+                endLat = destination.latitude,
+                endLon = destination.longitude
+            )
+
+            when (result) {
+                is TResult.Success -> {
+                    _state.update { it.copy(currentRoute = result.data, isLoading = false) }
+                }
+                is TResult.Error -> {
+                    _state.update { it.copy(isLoading = false) }
+                    _event.emit(MapEvent.ShowToast(R.string.error_unknown))
+                }
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.pavlusha.landmarksapp.ui.screens
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
@@ -30,6 +31,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,12 +43,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.pavlusha.domain.model.LandmarkDomainModel
 import com.pavlusha.domain.model.LandmarkSource
+import com.pavlusha.domain.model.WikipediaInfoDomainModel
 import com.pavlusha.landmarksapp.R
 import com.pavlusha.landmarksapp.ui.event.LandmarkDetailsEvent
 import com.pavlusha.landmarksapp.ui.intent.LandmarkDetailsIntent
@@ -170,7 +175,11 @@ fun LandmarkDetailsScreen(
 
                     Crossfade(targetState = state.selectedTab, label = "Tab Transition") { tab ->
                         when (tab) {
-                            DetailsTab.STATIC_INFO -> StaticInfoContent(landmark = state.landmark!!)
+                            DetailsTab.STATIC_INFO -> StaticInfoContent(
+                                landmark = state.landmark!!,
+                                wikiInfo = state.wikipediaInfo,
+                                isWikiLoading = state.isWikiLoading
+                            )
                             DetailsTab.AR_MODE -> ArModeContent(landmark = state.landmark!!)
                         }
                     }
@@ -181,16 +190,44 @@ fun LandmarkDetailsScreen(
 }
 
 @Composable
-fun StaticInfoContent(landmark: LandmarkDomainModel) {
+fun StaticInfoContent(
+    landmark: LandmarkDomainModel,
+    wikiInfo: WikipediaInfoDomainModel?,
+    isWikiLoading: Boolean
+) {
+    val uriHandler = LocalUriHandler.current
+    val context = LocalContext.current
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        if (!landmark.mainImageUrl.isNullOrEmpty() || !landmark.thumbnailUrl.isNullOrEmpty()) {
+        val displayImageUrl = wikiInfo?.thumbnailUrl
+            ?: wikiInfo?.originalImageUrl
+            ?: landmark.mainImageUrl
+            ?: landmark.thumbnailUrl
+
+        if (!displayImageUrl.isNullOrEmpty()) {
             AsyncImage(
-                model = landmark.mainImageUrl ?: landmark.thumbnailUrl,
+                model = ImageRequest.Builder(context)
+                    .data(displayImageUrl)
+                    .crossfade(true)
+                    .addHeader("User-Agent", "LandmarkARApp/1.0 (pavelbrutalll@gmail.com)")
+                    .listener(
+                        onStart = {
+                            Log.d("COIL_DEBUG", "Начали загрузку картинки: $displayImageUrl")
+                        },
+                        onSuccess = { _, _ ->
+                            Log.d("COIL_DEBUG", "УСПЕХ! Картинка загружена.")
+                        },
+                        onError = { _, result ->
+                            Log.e("COIL_DEBUG", "ОШИБКА загрузки картинки: ${result.throwable.message}")
+                            result.throwable.printStackTrace()
+                        }
+                    )
+                    .build(),
                 contentDescription = landmark.name,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -222,22 +259,44 @@ fun StaticInfoContent(landmark: LandmarkDomainModel) {
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = landmark.description.ifEmpty { landmark.shortDescription },
-            style = MaterialTheme.typography.bodyMedium
-        )
-        Text(
-            text = landmark.tags.toString(),
-            style = MaterialTheme.typography.bodyMedium
-        )
-        Text(
-            text = landmark.externalInfo.toString(),
-            style = MaterialTheme.typography.bodyMedium
-        )
-        Text(
-            text = landmark.sourceUrls.toString(),
-            style = MaterialTheme.typography.bodyMedium
-        )
+        if (isWikiLoading) {
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = colorResource(id = R.color.red)
+                )
+            }
+        } else if (wikiInfo != null) {
+            Text(
+                text = wikiInfo.extract,
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            if (wikiInfo.mobileArticleUrl != null) {
+                TextButton(
+                    onClick = { uriHandler.openUri(wikiInfo.mobileArticleUrl!!) },
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text("Читать подробнее", color = colorResource(id = R.color.red))
+                }
+            }
+        } else {
+            Text(
+                text = landmark.description.ifEmpty { landmark.shortDescription },
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        if (landmark.tags.isNotEmpty()) {
+            Text(
+                text = "Теги: ${landmark.tags.joinToString(", ")}",
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.Gray
+            )
+        }
     }
 }
 

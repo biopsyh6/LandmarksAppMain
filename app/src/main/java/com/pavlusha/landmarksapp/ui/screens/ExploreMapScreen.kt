@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -37,6 +38,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -56,7 +58,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
@@ -64,10 +68,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
+import com.pavlusha.data.mapper.RouteDataMapper
 import com.pavlusha.domain.model.SearchResultDomainModel
 import com.pavlusha.landmarksapp.R
 import com.pavlusha.landmarksapp.ui.event.MapEvent
 import com.pavlusha.landmarksapp.ui.intent.MapIntent
+import com.pavlusha.landmarksapp.ui.screens.common.formatDistance
 import com.pavlusha.landmarksapp.ui.viewmodel.MapViewModel
 import com.pavlusha.landmarksapp.util.vectorToBitmap
 import com.yandex.mapkit.Animation
@@ -144,6 +150,7 @@ fun ExploreMapScreen(
     val mapView = remember { MapView(context) }
 
     var mapObjectsCollection by remember { mutableStateOf<MapObjectCollection?>(null) }
+    var routeObjectsCollection by remember { mutableStateOf<MapObjectCollection?>(null) }
 
     val tapListener = remember {
         MapObjectTapListener { mapObject, _ ->
@@ -159,13 +166,16 @@ fun ExploreMapScreen(
 
     val cameraListener = remember {
         CameraListener { _, cameraPosition, cameraUpdateReason, _ ->
-            if (cameraUpdateReason == CameraUpdateReason.GESTURES) {
-                viewModel.onIntent(
-                    MapIntent.OnMapCameraMoved(
-                        latitude = cameraPosition.target.latitude,
-                        longitude = cameraPosition.target.longitude
-                    )
+            viewModel.onIntent(
+                MapIntent.OnMapCameraMoved(
+                    latitude = cameraPosition.target.latitude,
+                    longitude = cameraPosition.target.longitude,
+                    zoom = cameraPosition.zoom
                 )
+            )
+
+            if (cameraUpdateReason == CameraUpdateReason.GESTURES) {
+                viewModel.onIntent(MapIntent.StopTracking)
             }
         }
     }
@@ -288,6 +298,19 @@ fun ExploreMapScreen(
                 factory = {
                     mapView.mapWindow.map.addCameraListener(cameraListener)
                     mapObjectsCollection = mapView.mapWindow.map.mapObjects.addCollection()
+                    routeObjectsCollection = mapView.mapWindow.map.mapObjects.addCollection()
+
+                    val lastPos = state.lastCameraPosition
+                    if (lastPos != null) {
+                        mapView.mapWindow.map.move(
+                            CameraPosition(
+                                Point(lastPos.latitude, lastPos.longitude),
+                                lastPos.zoom,
+                                0f,
+                                0f
+                            )
+                        )
+                    }
                     mapView
                 },
                 update = { view ->
@@ -311,6 +334,20 @@ fun ExploreMapScreen(
 
                             placemark.userData = landmark
                             placemark.addTapListener(tapListener)
+                        }
+                    }
+
+                    routeObjectsCollection?.let { routeCollection ->
+                        routeCollection.clear()
+
+                        state.currentRoute?.let { routeDomainModel ->
+                            val polyline = RouteDataMapper.toYandexPolylineFromDomain(routeDomainModel)
+
+                            val routeObj = routeCollection.addPolyline(polyline)
+                            routeObj.setStrokeColor(android.graphics.Color.BLUE)
+                            routeObj.strokeWidth = 4f
+                            routeObj.setOutlineColor(android.graphics.Color.WHITE)
+                            routeObj.outlineWidth = 1f
                         }
                     }
                 }
@@ -340,11 +377,39 @@ fun ExploreMapScreen(
                 ZoomButton(icon = Icons.Default.Remove, onClick = { changeZoom(-1f) })
             }
 
+            if (state.currentRoute != null && state.selectedLandmark != null) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.TopCenter)
+                        .padding(top = 100.dp, start = 16.dp, end = 16.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    color = colorResource(id = R.color.red),
+                    shadowElevation = 8.dp
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column {
+                            Text("Идем к: ${state.selectedLandmark!!.name}", color = Color.White, fontWeight = FontWeight.Bold)
+                            Text("Осталось: ${formatDistance(state.distanceToSelected)}", color = Color.White)
+                        }
+                        IconButton(onClick = { viewModel.onIntent(MapIntent.OnCancelRouteClicked) }) {
+                            Icon(Icons.Default.Close, contentDescription = "Отменить маршрут", tint = Color.White)
+                        }
+                    }
+                }
+            }
+
             if (state.selectedLandmark != null) {
                 LandmarkInfoCard(
                     landmark = state.selectedLandmark!!,
+                    distance = state.distanceToSelected,
                     onClose = { viewModel.onIntent(MapIntent.OnCloseLandmarkInfo) },
                     onDetailsClick = { viewModel.onIntent(MapIntent.OnLandmarkDetailsClicked(state.selectedLandmark!!)) },
+                    onBuildRouteClick = { viewModel.onIntent(MapIntent.OnBuildRouteClicked) },
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(bottom = innerPadding.calculateBottomPadding() + 16.dp)
@@ -394,8 +459,14 @@ fun SearchBarUI(
                 )
             )
 
-            IconButton(onClick = onNearbyClick) {
-                Icon(Icons.Default.Place, contentDescription = "Поиск рядом")
+            if (query.isNotEmpty()) {
+                IconButton(onClick = onSearch) {
+                    Icon(Icons.Default.Search, contentDescription = "Найти")
+                }
+            } else {
+                IconButton(onClick = onNearbyClick) {
+                    Icon(Icons.Default.Place, contentDescription = "Поиск рядом")
+                }
             }
         }
     }
@@ -404,8 +475,10 @@ fun SearchBarUI(
 @Composable
 fun LandmarkInfoCard(
     landmark: SearchResultDomainModel,
+    distance: Float?,
     onClose: () -> Unit,
     onDetailsClick: () -> Unit,
+    onBuildRouteClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -429,18 +502,32 @@ fun LandmarkInfoCard(
             }
             Spacer(modifier = Modifier.height(8.dp))
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Default.Place,
-                    contentDescription = null,
-                    tint = Color.Gray,
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                    Icon(
+                        imageVector = Icons.Default.Place,
+                        contentDescription = null,
+                        tint = Color.Gray,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = landmark.address ?: "Адрес не указан",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Gray,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
                 Text(
-                    text = landmark.address ?: "Адрес не указан",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
+                    text = formatDistance(distance),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = colorResource(id = R.color.red),
+                    fontWeight = FontWeight.Bold
                 )
             }
 
@@ -462,14 +549,26 @@ fun LandmarkInfoCard(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Button(
-                onClick = onDetailsClick,
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colorResource(id = R.color.red)
-                )
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(text = "Подробнее", color = Color.White)
+                OutlinedButton(
+                    onClick = onBuildRouteClick,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Маршрут", color = colorResource(id = R.color.black))
+                }
+
+                Button(
+                    onClick = onDetailsClick,
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorResource(id = R.color.red)
+                    )
+                ) {
+                    Text(text = "Подробнее", color = Color.White)
+                }
             }
         }
     }

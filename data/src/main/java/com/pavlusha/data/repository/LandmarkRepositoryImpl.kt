@@ -4,6 +4,8 @@ import android.location.Location
 import com.pavlusha.data.local.dao.LandmarkDao
 import com.pavlusha.data.mapper.LandmarkLocalDataMapper
 import com.pavlusha.data.mapper.exception.toAppExceptionDomainModel
+import com.pavlusha.data.mapper.remote.LandmarkRemoteDataMapper
+import com.pavlusha.data.remote.LandmarkRemoteDataSource
 import com.pavlusha.domain.TResult
 import com.pavlusha.domain.model.LandmarkDomainModel
 import com.pavlusha.domain.model.RecognitionResultDomainModel
@@ -14,6 +16,7 @@ import kotlinx.coroutines.flow.Flow
 
 class LandmarkRepositoryImpl(
     private val landmarkDao: LandmarkDao,
+    private val remoteDataSource: LandmarkRemoteDataSource
 ) : ILandmarkRepository {
     override suspend fun getNearbyLandmarks(
         lat: Double,
@@ -21,21 +24,29 @@ class LandmarkRepositoryImpl(
         radiusMeters: Float
     ): TResult<List<LandmarkDomainModel>, AppExceptionDomainModel> {
         return try {
-            val delta = radiusMeters / 111000.0
+            val initialCheck = landmarkDao.searchLandmarks("")
+            if (initialCheck.isEmpty()) {
+                syncAllLandmarks()
+            }
 
             val allLocal = landmarkDao.searchLandmarks("")
 
-            val filtered = allLocal.filter {
+            val filtered = allLocal.mapNotNull { relation ->
                 val distance = FloatArray(1)
                 Location.distanceBetween(
                     lat,
                     lon,
-                    it.landmark.latitude,
-                    it.landmark.longitude,
+                    relation.landmark.latitude,
+                    relation.landmark.longitude,
                     distance
                 )
-                distance[0] <= radiusMeters
-            }.map { LandmarkLocalDataMapper.toDomainFromData(it) }
+
+                if (distance[0] <= radiusMeters) {
+                    LandmarkLocalDataMapper.toDomainFromData(relation).copy(distanceMeters = distance[0])
+                } else {
+                    null
+                }
+            }.sortedBy { it.distanceMeters }
 
             TResult.Success(filtered)
         } catch (e: Exception) {
@@ -45,11 +56,30 @@ class LandmarkRepositoryImpl(
 
     override suspend fun getLandmarkById(id: String): TResult<LandmarkDomainModel, AppExceptionDomainModel> {
         return try {
-            val result = landmarkDao.getLandmarkById(id)
-            if (result != null) {
-                TResult.Success(LandmarkLocalDataMapper.toDomainFromData(result))
+            val remoteData = remoteDataSource.getLandmarkById(id)
+
+            if (remoteData != null) {
+                var domainModel = LandmarkRemoteDataMapper.toDomainFromData(remoteData)
+
+                val existingLocal = landmarkDao.getLandmarkById(id)
+                if (existingLocal != null) {
+                    val localDomain = LandmarkLocalDataMapper.toDomainFromData(existingLocal)
+                    domainModel = domainModel.copy(
+                        isFavorite = localDomain.isFavorite,
+                        isAvailableOffline = localDomain.isAvailableOffline,
+                        localModel3dPath = localDomain.localModel3dPath,
+                        localMainImagePath = localDomain.localMainImagePath
+                    )
+                }
+
+                saveDomainToLocalDb(domainModel)
+            }
+
+            val finalLocalData = landmarkDao.getLandmarkById(id)
+            if (finalLocalData != null) {
+                TResult.Success(LandmarkLocalDataMapper.toDomainFromData(finalLocalData))
             } else {
-                TResult.Error(AppExceptionDomainModel.NotFound(Exception("Landmark not found in local DB")))
+                TResult.Error(AppExceptionDomainModel.NotFound(Exception("Landmark not found in local DB or Network")))
             }
         } catch (e: Exception) {
             TResult.Error(e.toAppExceptionDomainModel())
@@ -100,19 +130,27 @@ class LandmarkRepositoryImpl(
         }
     }
 
-    override suspend fun getAvailableRegions(): TResult<List<RegionPackageDomainModel>, AppExceptionDomainModel> {
-        TODO("Not yet implemented")
+    private suspend fun saveDomainToLocalDb(domain: LandmarkDomainModel) {
+        val dataToSave = LandmarkLocalDataMapper.fromDomainToData(domain)
+        landmarkDao.insertFullLandmark(
+            landmark = dataToSave.landmark,
+            periods = dataToSave.periods,
+            gallery = dataToSave.gallery,
+            tags = dataToSave.tags,
+            sources = dataToSave.sourceUrls,
+            externalInfo = dataToSave.externalInfo
+        )
     }
 
-    override suspend fun deleteRegion(regionId: String): TResult<Unit, AppExceptionDomainModel> {
-        TODO("Not yet implemented")
-    }
-
-    override fun downloadRegion(regionId: String): Flow<TResult<Float, AppExceptionDomainModel>> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getDownloadedRegions(): TResult<List<RegionPackageDomainModel>, AppExceptionDomainModel> {
-        TODO("Not yet implemented")
+    private suspend fun syncAllLandmarks() {
+        try {
+            val allRemote = remoteDataSource.getAllLandmarks()
+            allRemote.forEach { remoteModel ->
+                val domainModel = LandmarkRemoteDataMapper.toDomainFromData(remoteModel)
+                saveDomainToLocalDb(domainModel)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 }

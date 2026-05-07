@@ -1,7 +1,9 @@
 package com.pavlusha.data.mapper
 
+import com.pavlusha.data.local.entity.UserARPhotoEntity
 import com.pavlusha.data.local.entity.UserNoteEntity
 import com.pavlusha.data.local.entity.VisitHistoryEntity
+import com.pavlusha.domain.model.UserARPhotoDomainModel
 import com.pavlusha.domain.model.UserNoteDomainModel
 import com.pavlusha.domain.model.VisitHistoryDomainModel
 
@@ -41,6 +43,26 @@ object UserContentLocalDataMapper {
             landmarkId = domain.landmarkId,
             visitDate = domain.visitDate,
             durationSeconds = domain.durationSeconds
+        )
+    }
+
+    fun toDomainFromData(entity: UserARPhotoEntity): UserARPhotoDomainModel {
+        return UserARPhotoDomainModel(
+            id = entity.id,
+            landmarkId = entity.landmarkId,
+            localFilePath = entity.localFilePath,
+            remoteUrl = entity.remoteUrl,
+            createdAt = entity.createdAt
+        )
+    }
+
+    fun fromDomainToData(domain: UserARPhotoDomainModel): UserARPhotoEntity {
+        return UserARPhotoEntity(
+            id = domain.id,
+            landmarkId = domain.landmarkId,
+            localFilePath = domain.localFilePath,
+            remoteUrl = domain.remoteUrl,
+            createdAt = domain.createdAt
         )
     }
 }

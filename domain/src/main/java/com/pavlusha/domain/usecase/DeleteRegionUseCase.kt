@@ -2,10 +2,10 @@ package com.pavlusha.domain.usecase
 
 import com.pavlusha.domain.TResult
 import com.pavlusha.domain.model.exception.AppExceptionDomainModel
-import com.pavlusha.domain.repository.ILandmarkRepository
+import com.pavlusha.domain.repository.IRegionRepository
 
 class DeleteRegionUseCase(
-    private val repository: ILandmarkRepository
+    private val repository: IRegionRepository
 ) {
     suspend operator fun invoke(
         regionId: String
