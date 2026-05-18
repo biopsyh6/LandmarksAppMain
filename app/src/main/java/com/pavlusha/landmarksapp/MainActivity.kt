@@ -1,5 +1,11 @@
 package com.pavlusha.landmarksapp
 
+
+//import com.google.ai.edge.litert.TensorBuffer
+
+//import com.google.ai.edge.litert.DataType
+//import com.google.ai.edge.litert.support.tensorbuffer.TensorBuffer
+
 import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -52,6 +58,7 @@ import androidx.navigation.navArgument
 import com.pavlusha.domain.model.LandmarkSource
 import com.pavlusha.landmarksapp.ml.Model
 import com.pavlusha.landmarksapp.ui.screens.LandmarkDetailsScreen
+import com.pavlusha.landmarksapp.ui.screens.LandmarkRecognitionScreen
 import com.pavlusha.landmarksapp.ui.screens.LoginScreen
 import com.pavlusha.landmarksapp.ui.screens.MainTabsScreen
 import com.pavlusha.landmarksapp.ui.screens.RegisterScreen
@@ -59,13 +66,6 @@ import com.pavlusha.landmarksapp.ui.screens.ResetPasswordScreen
 import com.pavlusha.landmarksapp.ui.theme.LandmarksAppTheme
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
-
-
-//import com.google.ai.edge.litert.TensorBuffer
-
-//import com.google.ai.edge.litert.DataType
-//import com.google.ai.edge.litert.support.tensorbuffer.TensorBuffer
-
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -97,6 +97,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        uploadInitialDataToFirestore()
         enableEdgeToEdge()
         setContent {
             LandmarksAppTheme {
@@ -309,6 +310,12 @@ fun Main() {
 
         composable("main_content") {
             MainTabsScreen(rootNavController)
+        }
+
+        composable("ar_recognition") {
+            LandmarkRecognitionScreen(
+                onNavigateBack = { rootNavController.popBackStack() }
+            )
         }
 
         composable(

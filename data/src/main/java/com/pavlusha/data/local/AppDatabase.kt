@@ -39,8 +39,8 @@ import com.pavlusha.data.local.entity.VisitHistoryEntity
         UserEntity::class,
         UserARPhotoEntity::class
     ],
-    version = 3,
-    exportSchema = false
+    version = 1,
+    exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun landmarkDao(): LandmarkDao

@@ -43,19 +43,23 @@ fun MainTabsScreen(rootNavController: NavController) {
             ) {
                 destinations.forEach { destination ->
                     NavigationBarItem(
-                        selected = currentRoute == destination.route,
+                        selected = currentRoute == destination.route && destination != Destination.RECOGNITION,
                         onClick = {
-                            tabsNavController.navigate(destination.route) {
-                                popUpTo(tabsNavController.graph.startDestinationId) {
-                                    saveState = true
+                            if (destination == Destination.RECOGNITION) {
+                                rootNavController.navigate("ar_recognition")
+                            } else {
+                                tabsNavController.navigate(destination.route) {
+                                    popUpTo(tabsNavController.graph.startDestinationId) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
-                                launchSingleTop = true
-                                restoreState = true
                             }
                         },
                         icon = {
                             NavigationIconWithIndicator(
-                                isSelected = currentRoute == destination.route,
+                                isSelected = currentRoute == destination.route && destination != Destination.RECOGNITION,
                                 destination = destination
                             )
                         },

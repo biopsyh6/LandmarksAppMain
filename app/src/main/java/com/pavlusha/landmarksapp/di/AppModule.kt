@@ -3,6 +3,7 @@ package com.pavlusha.landmarksapp.di
 import com.pavlusha.landmarksapp.ui.viewmodel.LandmarkDetailsViewModel
 import com.pavlusha.landmarksapp.ui.viewmodel.LoginViewModel
 import com.pavlusha.landmarksapp.ui.viewmodel.MapViewModel
+import com.pavlusha.landmarksapp.ui.viewmodel.RecognitionViewModel
 import com.pavlusha.landmarksapp.ui.viewmodel.RegisterViewModel
 import com.pavlusha.landmarksapp.ui.viewmodel.ResetPasswordViewModel
 import kotlinx.coroutines.Dispatchers
@@ -45,6 +46,12 @@ val appModule = module {
         LandmarkDetailsViewModel(
             getLandmarkDetailsUseCase = get(),
             getWikipediaInfoUseCase = get()
+        )
+    }
+
+    viewModel<RecognitionViewModel> {
+        RecognitionViewModel(
+            identifyLandmarkUseCase = get()
         )
     }
 }

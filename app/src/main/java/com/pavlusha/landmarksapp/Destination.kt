@@ -18,12 +18,12 @@ enum class Destination(
         activeIcon = { painterResource(id = R.drawable.ic_launcher_foreground) },
         contentDescription = "Search Landmarks",
     ),
-    FAVOURITES(
-        route = "favourites",
-        label = "Favourites",
+    RECOGNITION(
+        route = "recognition",
+        label = "Recognition",
         inactiveIcon = { painterResource(id = R.drawable.ic_launcher_foreground) },
         activeIcon = { painterResource(id = R.drawable.ic_launcher_foreground) },
-        contentDescription = "Saved places"
+        contentDescription = "Camera for recognise"
     ),
     PROFILE(
         route = "profile",

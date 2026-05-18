@@ -15,12 +15,15 @@ class AddToHistoryUseCase(
         landmarkId: String,
         durationSeconds: Int
     ): TResult<Unit, AppExceptionDomainModel> {
-        if (authRepository.getCurrentUser() == null) {
+        val user = authRepository.getCurrentUser()
+
+        if (user == null) {
             return TResult.Error(AppExceptionDomainModel.NoAuth(Exception("Login to save history")))
         }
 
         val visit = VisitHistoryDomainModel(
             id = UUID.randomUUID().toString(),
+            userId = user.id,
             landmarkId = landmarkId,
             visitDate = System.currentTimeMillis(),
             durationSeconds = durationSeconds

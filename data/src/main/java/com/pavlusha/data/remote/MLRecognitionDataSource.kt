@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.media.ThumbnailUtils
+import android.util.Log
 import com.pavlusha.data.ml.Model
 import com.pavlusha.domain.model.RecognitionResultDomainModel
 import kotlinx.coroutines.Dispatchers
@@ -89,6 +90,8 @@ class MLRecognitionDataSource(
                 }
             }
 
+            Log.d("ML_RECOGNITION", "Recognized: ${classes[maxPos]} with confidence: $maxConfidence")
+
             if (maxConfidence < 0.5f) {
                 return@withContext null
             }
@@ -101,6 +104,7 @@ class MLRecognitionDataSource(
             )
 
         } catch (e: Exception) {
+            Log.e("ML_RECOGNITION", "Exception in recognizeImage", e)
             throw e
         }
     }

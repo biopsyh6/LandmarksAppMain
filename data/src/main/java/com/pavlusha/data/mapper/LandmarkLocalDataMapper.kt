@@ -38,6 +38,10 @@ object LandmarkLocalDataMapper {
             ),
 
             currentModel3dPath = entity.currentModel3dPath,
+            remoteModel3dPath = entity.remoteModel3dPath,
+            localModel3dPath = entity.localModel3dPath,
+            remoteMainImageUrl = entity.remoteMainImageUrl,
+            localMainImagePath = entity.localMainImagePath,
             mainImageUrl = entity.mainImageUrl,
             thumbnailUrl = entity.thumbnailUrl,
 

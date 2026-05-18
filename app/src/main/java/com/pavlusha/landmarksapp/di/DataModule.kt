@@ -112,8 +112,7 @@ val dataModule = module {
         UserContentRepositoryImpl(
             userContentDao = get(),
             userRemoteDataSource = get(),
-            photoStorageDataSource = get(),
-            firebaseAuth = get()
+            photoStorageDataSource = get()
         )
     }
 

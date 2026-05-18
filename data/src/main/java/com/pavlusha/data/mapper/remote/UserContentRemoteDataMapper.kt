@@ -9,6 +9,7 @@ object UserContentRemoteDataMapper {
     fun toDomainFromData(remote: UserNoteRemoteModel): UserNoteDomainModel {
         return UserNoteDomainModel(
             id = remote.id,
+            userId = remote.userId,
             landmarkId = remote.landmarkId,
             text = remote.text,
             createdAt = remote.createdAt,
@@ -19,6 +20,7 @@ object UserContentRemoteDataMapper {
     fun fromDomainToData(domain: UserNoteDomainModel): UserNoteRemoteModel {
         return UserNoteRemoteModel(
             id = domain.id,
+            userId = domain.userId,
             landmarkId = domain.landmarkId,
             text = domain.text,
             createdAt = domain.createdAt,
@@ -29,6 +31,7 @@ object UserContentRemoteDataMapper {
     fun toDomainFromData(remote: VisitHistoryRemoteModel): VisitHistoryDomainModel {
         return VisitHistoryDomainModel(
             id = remote.id,
+            userId = remote.userId,
             landmarkId = remote.landmarkId,
             visitDate = remote.visitDate,
             durationSeconds = remote.durationSeconds
@@ -38,6 +41,7 @@ object UserContentRemoteDataMapper {
     fun fromDomainToData(domain: VisitHistoryDomainModel): VisitHistoryRemoteModel {
         return VisitHistoryRemoteModel(
             id = domain.id,
+            userId = domain.userId,
             landmarkId = domain.landmarkId,
             visitDate = domain.visitDate,
             durationSeconds = domain.durationSeconds

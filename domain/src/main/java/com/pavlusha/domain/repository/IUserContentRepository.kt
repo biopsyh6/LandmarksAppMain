@@ -12,7 +12,8 @@ interface IUserContentRepository {
     ): TResult<Unit, AppExceptionDomainModel>
 
     suspend fun getNotesForLandmark(
-        landmarkId: String
+        landmarkId: String,
+        userId: String
     ): TResult<List<UserNoteDomainModel>, AppExceptionDomainModel>
 
     suspend fun addToHistory(
@@ -21,10 +22,13 @@ interface IUserContentRepository {
 
     suspend fun saveARPhoto(
         landmarkId: String,
+        userId: String,
         imageBytes: ByteArray
     ): TResult<UserARPhotoDomainModel, AppExceptionDomainModel>
 
-    suspend fun getUserGallery(): TResult<List<UserARPhotoDomainModel>, AppExceptionDomainModel>
+    suspend fun getUserGallery(
+        userId: String
+    ): TResult<List<UserARPhotoDomainModel>, AppExceptionDomainModel>
 
     suspend fun deleteARPhoto(photoId: String): TResult<Unit, AppExceptionDomainModel>
 }

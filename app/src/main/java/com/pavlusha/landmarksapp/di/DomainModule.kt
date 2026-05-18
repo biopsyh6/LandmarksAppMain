@@ -135,13 +135,15 @@ val domainModule = module {
 
     factory<GetNotesForLandmarkUseCase> {
         GetNotesForLandmarkUseCase(
-            repository = get()
+            repository = get(),
+            authRepository = get()
         )
     }
 
     factory<GetUserGalleryUseCase> {
         GetUserGalleryUseCase(
-            repository = get()
+            repository = get(),
+            authRepository = get()
         )
     }
 
@@ -172,7 +174,8 @@ val domainModule = module {
 
     factory<SaveARPhotoUseCase> {
         SaveARPhotoUseCase(
-            repository = get()
+            repository = get(),
+            authRepository = get()
         )
     }
 

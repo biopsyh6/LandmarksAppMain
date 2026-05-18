@@ -87,26 +87,31 @@ class LandmarkRepositoryImpl(
     }
 
     override suspend fun getLandmarkByRecognition(result: RecognitionResultDomainModel): TResult<LandmarkDomainModel, AppExceptionDomainModel> {
-        if (result.landmarkId != null) {
-            return getLandmarkById(result.landmarkId!!)
-        }
 
-        val searchResult = searchLandmarks(result.className)
-
-        return when (searchResult) {
-            is TResult.Success -> {
-                val landmark = searchResult.data.firstOrNull()
-                if (landmark != null) {
-                    TResult.Success(landmark)
-                } else {
-                    TResult.Error(AppExceptionDomainModel.NotFound(Exception("No landmark for class: ${result.className}")))
-                }
-            }
-
-            is TResult.Error -> {
-                TResult.Error(searchResult.exception)
-            }
-        }
+        val targetId = result.landmarkId ?: result.className
+        return getLandmarkById(targetId)
+//        if (result.landmarkId != null) {
+//            return getLandmarkById(result.landmarkId!!)
+//        }
+//
+//        val searchQuery = mapClassNameToDbQuery(result.className)
+//
+//        val searchResult = searchLandmarks(searchQuery)
+//
+//        return when (searchResult) {
+//            is TResult.Success -> {
+//                val landmark = searchResult.data.firstOrNull()
+//                if (landmark != null) {
+//                    TResult.Success(landmark)
+//                } else {
+//                    TResult.Error(AppExceptionDomainModel.NotFound(Exception("No landmark for class: ${result.className}")))
+//                }
+//            }
+//
+//            is TResult.Error -> {
+//                TResult.Error(searchResult.exception)
+//            }
+//        }
     }
 
     override suspend fun toggleFavourite(
@@ -151,6 +156,26 @@ class LandmarkRepositoryImpl(
             }
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    private fun mapClassNameToDbQuery(className: String): String {
+        return when(className) {
+            "island_of_tears" -> "Остров Мужества и Скорби"
+            "library" -> "Национальная библиотека Беларуси"
+            "mir" -> "Мирский замок"
+            "bigben" -> "Биг-Бен"
+            "church_nemiga" -> "Свято-Духов собор (Минск)"
+            "colosseum" -> "Колизей"
+            "eiffel" -> "Эйфелева башня"
+            "isaac" -> "Исаакиевский собор"
+            "minsk_gates" -> "Ворота Минска"
+            "pisa" -> "Пизанская башня"
+            "sphinx" -> "Большой сфинкс"
+            "taj_mahal" -> "Тадж-Махал"
+            "tower_bridge" -> "Тауэрский мост"
+            "townhall" -> "Минская ратуша"
+            else -> className.replace("_", " ")
         }
     }
 }

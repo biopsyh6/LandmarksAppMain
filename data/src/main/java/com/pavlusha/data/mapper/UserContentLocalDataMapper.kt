@@ -11,6 +11,7 @@ object UserContentLocalDataMapper {
     fun toDomainFromData(entity: UserNoteEntity): UserNoteDomainModel {
         return UserNoteDomainModel(
             id = entity.id,
+            userId = entity.userId,
             landmarkId = entity.landmarkId,
             text = entity.text,
             createdAt = entity.createdAt,
@@ -21,6 +22,7 @@ object UserContentLocalDataMapper {
     fun fromDomainToData(domain: UserNoteDomainModel): UserNoteEntity {
         return UserNoteEntity(
             id = domain.id,
+            userId = domain.userId,
             landmarkId = domain.landmarkId,
             text = domain.text,
             createdAt = domain.createdAt,
@@ -31,6 +33,7 @@ object UserContentLocalDataMapper {
     fun toDomainFromData(entity: VisitHistoryEntity): VisitHistoryDomainModel {
         return VisitHistoryDomainModel(
             id = entity.id,
+            userId = entity.userId,
             landmarkId = entity.landmarkId,
             visitDate = entity.visitDate,
             durationSeconds = entity.durationSeconds
@@ -40,6 +43,7 @@ object UserContentLocalDataMapper {
     fun fromDomainToData(domain: VisitHistoryDomainModel): VisitHistoryEntity {
         return VisitHistoryEntity(
             id = domain.id,
+            userId = domain.userId,
             landmarkId = domain.landmarkId,
             visitDate = domain.visitDate,
             durationSeconds = domain.durationSeconds
@@ -49,6 +53,7 @@ object UserContentLocalDataMapper {
     fun toDomainFromData(entity: UserARPhotoEntity): UserARPhotoDomainModel {
         return UserARPhotoDomainModel(
             id = entity.id,
+            userId = entity.userId,
             landmarkId = entity.landmarkId,
             localFilePath = entity.localFilePath,
             remoteUrl = entity.remoteUrl,
@@ -59,6 +64,7 @@ object UserContentLocalDataMapper {
     fun fromDomainToData(domain: UserARPhotoDomainModel): UserARPhotoEntity {
         return UserARPhotoEntity(
             id = domain.id,
+            userId = domain.userId,
             landmarkId = domain.landmarkId,
             localFilePath = domain.localFilePath,
             remoteUrl = domain.remoteUrl,

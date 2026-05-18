@@ -23,6 +23,7 @@ class SaveLandmarkNoteUseCase(
 
         val note = UserNoteDomainModel(
             id = UUID.randomUUID().toString(),
+            userId = user.id,
             landmarkId = landmarkId,
             text = text,
             createdAt = System.currentTimeMillis(),

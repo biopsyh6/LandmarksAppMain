@@ -13,11 +13,11 @@ import kotlinx.coroutines.flow.Flow
 interface UserContentDao {
     // Notes
 
-    @Query("SELECT * FROM user_notes WHERE landmarkId = :landmarkId ORDER BY updatedAt DESC")
-    suspend fun getNotesByLandmarkId(landmarkId: String): List<UserNoteEntity>
+    @Query("SELECT * FROM user_notes WHERE landmarkId = :landmarkId AND userId = :userId ORDER BY updatedAt DESC")
+    suspend fun getNotesByLandmarkId(landmarkId: String, userId: String): List<UserNoteEntity>
 
-    @Query("SELECT * FROM user_notes ORDER BY updatedAt DESC")
-    fun getAllNotesFlow(): Flow<List<UserNoteEntity>>
+    @Query("SELECT * FROM user_notes WHERE userId = :userId ORDER BY updatedAt DESC")
+    fun getAllNotesFlow(userId: String): Flow<List<UserNoteEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertNote(note: UserNoteEntity)
@@ -31,13 +31,16 @@ interface UserContentDao {
     @Query("DELETE FROM user_notes")
     suspend fun clearAllNotes()
 
+    @Query("DELETE FROM user_notes WHERE userId = :userId")
+    suspend fun clearNotesByUser(userId: String)
+
     // Visit History
 
-    @Query("SELECT * FROM visit_history WHERE landmarkId = :landmarkId ORDER BY visitDate DESC")
-    suspend fun getVisitsByLandmarkId(landmarkId: String): List<VisitHistoryEntity>
+    @Query("SELECT * FROM visit_history WHERE landmarkId = :landmarkId AND userId = :userId ORDER BY visitDate DESC")
+    suspend fun getVisitsByLandmarkId(landmarkId: String, userId: String): List<VisitHistoryEntity>
 
-    @Query("SELECT * FROM visit_history ORDER BY visitDate DESC")
-    fun getAllVisitsFlow(): Flow<List<VisitHistoryEntity>>
+    @Query("SELECT * FROM visit_history WHERE userId = :userId ORDER BY visitDate DESC")
+    fun getAllVisitsFlow(userId: String): Flow<List<VisitHistoryEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertVisit(visit: VisitHistoryEntity)
@@ -51,8 +54,11 @@ interface UserContentDao {
     @Query("DELETE FROM visit_history")
     suspend fun clearAllVisits()
 
-    @Query("SELECT * FROM user_ar_photos ORDER BY createdAt DESC")
-    suspend fun getAllARPhotos(): List<UserARPhotoEntity>
+    @Query("DELETE FROM visit_history WHERE userId = :userId")
+    suspend fun clearVisitsByUser(userId: String)
+
+    @Query("SELECT * FROM user_ar_photos WHERE userId = :userId ORDER BY createdAt DESC")
+    suspend fun getAllARPhotos(userId: String): List<UserARPhotoEntity>
 
     @Query("SELECT * FROM user_ar_photos WHERE id = :photoId LIMIT 1")
     suspend fun getARPhotoById(photoId: String): UserARPhotoEntity?
@@ -62,4 +68,7 @@ interface UserContentDao {
 
     @Query("DELETE FROM user_ar_photos WHERE id = :photoId")
     suspend fun deleteARPhotoById(photoId: String)
+
+    @Query("DELETE FROM user_ar_photos WHERE userId = :userId")
+    suspend fun clearPhotosByUser(userId: String)
 }
