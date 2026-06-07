@@ -1,13 +1,13 @@
 package com.pavlusha.landmarksapp.ui.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pavlusha.domain.TResult
 import com.pavlusha.domain.model.LandmarkSource
-import com.pavlusha.domain.model.exception.AppExceptionDomainModel
 import com.pavlusha.domain.usecase.GetLandmarkDetailsUseCase
 import com.pavlusha.domain.usecase.GetWikipediaInfoUseCase
+import com.pavlusha.domain.usecase.SaveLandmarkNoteUseCase
+import com.pavlusha.domain.usecase.ToggleFavoriteUseCase
 import com.pavlusha.landmarksapp.R
 import com.pavlusha.landmarksapp.ui.SingleFlowEvent
 import com.pavlusha.landmarksapp.ui.event.LandmarkDetailsEvent
@@ -22,7 +22,9 @@ import kotlinx.coroutines.launch
 
 class LandmarkDetailsViewModel(
     private val getLandmarkDetailsUseCase: GetLandmarkDetailsUseCase,
-    private val getWikipediaInfoUseCase: GetWikipediaInfoUseCase
+    private val getWikipediaInfoUseCase: GetWikipediaInfoUseCase,
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
+    private val saveLandmarkNoteUseCase: SaveLandmarkNoteUseCase
 ) : ViewModel() {
     private val _state = MutableStateFlow(LandmarkDetailsState())
     val state: StateFlow<LandmarkDetailsState> = _state.asStateFlow()
@@ -36,6 +38,7 @@ class LandmarkDetailsViewModel(
             is LandmarkDetailsIntent.OnTabSelected -> _state.update { it.copy(selectedTab = intent.tab) }
             is LandmarkDetailsIntent.OnBackClicked -> navigateBack()
             is LandmarkDetailsIntent.OnToggleFavorite -> toggleFavorite()
+            is LandmarkDetailsIntent.OnSaveNoteClicked -> saveNote(intent.text)
         }
     }
 
@@ -87,6 +90,43 @@ class LandmarkDetailsViewModel(
     }
 
     private fun toggleFavorite() {
-        // TODO: Использовать ToggleFavoriteUseCase
+        val currentLandmark = _state.value.landmark ?: return
+        val newFavoriteStatus = !currentLandmark.isFavorite
+
+        viewModelScope.launch {
+            val result = toggleFavoriteUseCase(currentLandmark.id, newFavoriteStatus)
+
+            when (result) {
+                is TResult.Success -> {
+                    _state.update { currentState ->
+                        currentState.copy(
+                            landmark = currentState.landmark?.copy(isFavorite = newFavoriteStatus)
+                        )
+                    }
+                }
+                is TResult.Error -> {
+                    val errorRes = result.exception?.parseToResource() ?: R.string.error_unknown
+                    _event.emit(LandmarkDetailsEvent.ShowToast(errorRes))
+                }
+            }
+        }
+    }
+
+    private fun saveNote(text: String) {
+        val landmarkId = _state.value.landmark?.id ?: return
+
+        viewModelScope.launch {
+            val result = saveLandmarkNoteUseCase(landmarkId, text)
+
+            when (result) {
+                is TResult.Success -> {
+                    _event.emit(LandmarkDetailsEvent.ShowToast(R.string.note_saved))
+                }
+                is TResult.Error -> {
+                    val errorRes = result.exception?.parseToResource() ?: R.string.error_unknown
+                    _event.emit(LandmarkDetailsEvent.ShowToast(errorRes))
+                }
+            }
+        }
     }
 }

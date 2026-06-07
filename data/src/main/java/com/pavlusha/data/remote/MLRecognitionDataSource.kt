@@ -79,20 +79,37 @@ class MLRecognitionDataSource(
             inputFeature0.loadBuffer(byteBuffer)
 
             val outputs = model!!.process(inputFeature0)
-            val confidences = outputs.outputFeature0AsTensorBuffer.floatArray
+            val logits = outputs.outputFeature0AsTensorBuffer.floatArray
+//            val confidences = outputs.outputFeature0AsTensorBuffer.floatArray
+            var maxLogit = Float.NEGATIVE_INFINITY
+            for (logit in logits) {
+                if (logit > maxLogit) maxLogit = logit
+            }
+
+            var sumExp = 0f
+            val probabilities = FloatArray(logits.size)
+            for (i in logits.indices) {
+                val exp = kotlin.math.exp((logits[i] - maxLogit).toDouble()).toFloat()
+                probabilities[i] = exp
+                sumExp += exp
+            }
+
+            for (i in probabilities.indices) {
+                probabilities[i] = probabilities[i] / sumExp
+            }
 
             var maxPos = 0
             var maxConfidence = 0f
-            for (i in confidences.indices) {
-                if (confidences[i] > maxConfidence) {
-                    maxConfidence = confidences[i]
+            for (i in probabilities.indices) {
+                if (probabilities[i] > maxConfidence) {
+                    maxConfidence = probabilities[i]
                     maxPos = i
                 }
             }
 
-            Log.d("ML_RECOGNITION", "Recognized: ${classes[maxPos]} with confidence: $maxConfidence")
+            Log.d("ML_RECOGNITION", "Recognized: ${classes[maxPos]} with TRUE confidence: $maxConfidence (Logit: ${logits[maxPos]})")
 
-            if (maxConfidence < 0.5f) {
+            if (maxConfidence < 0.85f) {
                 return@withContext null
             }
 

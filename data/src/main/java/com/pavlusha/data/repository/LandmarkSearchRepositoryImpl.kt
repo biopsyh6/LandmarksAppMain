@@ -17,13 +17,6 @@ import com.pavlusha.domain.model.exception.AppExceptionDomainModel
 import com.pavlusha.domain.repository.ILandmarkSearchRepository
 import com.yandex.mapkit.geometry.Geometry
 import com.yandex.mapkit.geometry.Point
-import com.yandex.mapkit.search.Response
-import com.yandex.mapkit.search.SearchManager
-import com.yandex.mapkit.search.SearchOptions
-import com.yandex.mapkit.search.Session
-import com.yandex.runtime.Error
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resume
 
 class LandmarkSearchRepositoryImpl(
     private val searchDataSource: YandexSearchDataSource,

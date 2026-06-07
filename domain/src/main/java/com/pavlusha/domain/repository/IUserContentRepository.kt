@@ -16,6 +16,10 @@ interface IUserContentRepository {
         userId: String
     ): TResult<List<UserNoteDomainModel>, AppExceptionDomainModel>
 
+    suspend fun getAllUserNotes(userId: String): TResult<List<UserNoteDomainModel>, AppExceptionDomainModel>
+
+    suspend fun deleteNote(noteId: String, userId: String): TResult<Unit, AppExceptionDomainModel>
+
     suspend fun addToHistory(
         visit: VisitHistoryDomainModel
     ): TResult<Unit, AppExceptionDomainModel>

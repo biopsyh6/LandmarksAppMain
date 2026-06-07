@@ -6,8 +6,11 @@ import com.pavlusha.domain.repository.ILandmarkSearchRepository
 import com.pavlusha.domain.repository.ILocationRepository
 import com.pavlusha.domain.usecase.AddToHistoryUseCase
 import com.pavlusha.domain.usecase.DeleteARPhotoUseCase
+import com.pavlusha.domain.usecase.DeleteNoteUseCase
 import com.pavlusha.domain.usecase.GetARContentForLandmarkUseCase
+import com.pavlusha.domain.usecase.GetAllNotesWithLandmarksUseCase
 import com.pavlusha.domain.usecase.GetCurrentUserUseCase
+import com.pavlusha.domain.usecase.GetFavoriteLandmarksUseCase
 import com.pavlusha.domain.usecase.GetLandmarkDetailsUseCase
 import com.pavlusha.domain.usecase.GetLocalLandmarkDetailsUseCase
 import com.pavlusha.domain.usecase.GetNearbyLandmarksUseCase
@@ -33,6 +36,8 @@ import com.pavlusha.domain.usecase.SignOutUseCase
 import com.pavlusha.domain.usecase.SignUpUseCase
 import com.pavlusha.domain.usecase.ToggleFavoriteUseCase
 import com.pavlusha.domain.usecase.UpdateMLModelUseCase
+import com.pavlusha.domain.usecase.UpdateNoteUseCase
+import com.pavlusha.domain.usecase.UpdateUserProfileUseCase
 import org.koin.dsl.module
 
 val domainModule = module {
@@ -201,6 +206,41 @@ val domainModule = module {
     factory<GetPedestrianRouteUseCase> {
         GetPedestrianRouteUseCase(
             routingRepository = get()
+        )
+    }
+
+    factory<UpdateUserProfileUseCase> {
+        UpdateUserProfileUseCase(
+            repository = get()
+        )
+    }
+
+    factory<GetFavoriteLandmarksUseCase> {
+        GetFavoriteLandmarksUseCase(
+            repository = get(),
+            authRepository = get()
+        )
+    }
+
+    factory<GetAllNotesWithLandmarksUseCase> {
+        GetAllNotesWithLandmarksUseCase(
+            userContentRepository = get(),
+            landmarkRepository = get(),
+            authRepository = get()
+        )
+    }
+
+    factory<DeleteNoteUseCase> {
+        DeleteNoteUseCase(
+            userContentRepository = get(),
+            authRepository = get()
+        )
+    }
+
+    factory<UpdateNoteUseCase> {
+        UpdateNoteUseCase(
+            userContentRepository = get(),
+            authRepository = get()
         )
     }
 }

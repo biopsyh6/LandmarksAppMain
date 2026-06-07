@@ -1,8 +1,12 @@
 package com.pavlusha.landmarksapp.di
 
+import com.pavlusha.landmarksapp.ui.viewmodel.ARGalleryViewModel
+import com.pavlusha.landmarksapp.ui.viewmodel.FavoritesViewModel
 import com.pavlusha.landmarksapp.ui.viewmodel.LandmarkDetailsViewModel
 import com.pavlusha.landmarksapp.ui.viewmodel.LoginViewModel
 import com.pavlusha.landmarksapp.ui.viewmodel.MapViewModel
+import com.pavlusha.landmarksapp.ui.viewmodel.MyNotesViewModel
+import com.pavlusha.landmarksapp.ui.viewmodel.ProfileViewModel
 import com.pavlusha.landmarksapp.ui.viewmodel.RecognitionViewModel
 import com.pavlusha.landmarksapp.ui.viewmodel.RegisterViewModel
 import com.pavlusha.landmarksapp.ui.viewmodel.ResetPasswordViewModel
@@ -45,13 +49,47 @@ val appModule = module {
     viewModel<LandmarkDetailsViewModel> {
         LandmarkDetailsViewModel(
             getLandmarkDetailsUseCase = get(),
-            getWikipediaInfoUseCase = get()
+            getWikipediaInfoUseCase = get(),
+            toggleFavoriteUseCase = get(),
+            saveLandmarkNoteUseCase = get()
         )
     }
 
     viewModel<RecognitionViewModel> {
         RecognitionViewModel(
-            identifyLandmarkUseCase = get()
+            identifyLandmarkUseCase = get(),
+            getARContentForLandmarkUseCase = get(),
+            saveARPhotoUseCase = get()
+        )
+    }
+
+    viewModel<ProfileViewModel> {
+        ProfileViewModel(
+            getCurrentUserUseCase = get(),
+            signOutUseCase = get(),
+            updateUserProfileUseCase = get()
+        )
+    }
+
+    viewModel<FavoritesViewModel> {
+        FavoritesViewModel(
+            getFavoriteLandmarksUseCase = get(),
+            toggleFavoriteUseCase = get()
+        )
+    }
+
+    viewModel<ARGalleryViewModel> {
+        ARGalleryViewModel(
+            getUserGalleryUseCase = get(),
+            deleteARPhotoUseCase = get()
+        )
+    }
+
+    viewModel<MyNotesViewModel> {
+        MyNotesViewModel(
+            getAllNotesWithLandmarksUseCase = get(),
+            deleteNoteUseCase = get(),
+            updateNoteUseCase = get()
         )
     }
 }

@@ -19,4 +19,5 @@ interface IAuthRepository {
     suspend fun signOut(): TResult<Unit, AppExceptionDomainModel>
 
     suspend fun resetPassword(email: String): TResult<Unit, AppExceptionDomainModel>
+    suspend fun updateUserProfile(user: UserDomainModel): TResult<Unit, AppExceptionDomainModel>
 }

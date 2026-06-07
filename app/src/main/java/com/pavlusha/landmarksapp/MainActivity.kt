@@ -57,10 +57,14 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.pavlusha.domain.model.LandmarkSource
 import com.pavlusha.landmarksapp.ml.Model
+import com.pavlusha.landmarksapp.ui.screens.ARGalleryScreen
+import com.pavlusha.landmarksapp.ui.screens.FavoritesScreen
 import com.pavlusha.landmarksapp.ui.screens.LandmarkDetailsScreen
 import com.pavlusha.landmarksapp.ui.screens.LandmarkRecognitionScreen
 import com.pavlusha.landmarksapp.ui.screens.LoginScreen
 import com.pavlusha.landmarksapp.ui.screens.MainTabsScreen
+import com.pavlusha.landmarksapp.ui.screens.MyNotesScreen
+import com.pavlusha.landmarksapp.ui.screens.RecognizedLandmarkInfoScreen
 import com.pavlusha.landmarksapp.ui.screens.RegisterScreen
 import com.pavlusha.landmarksapp.ui.screens.ResetPasswordScreen
 import com.pavlusha.landmarksapp.ui.theme.LandmarksAppTheme
@@ -97,7 +101,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        uploadInitialDataToFirestore()
+//        uploadInitialDataToFirestore()
         enableEdgeToEdge()
         setContent {
             LandmarksAppTheme {
@@ -312,8 +316,42 @@ fun Main() {
             MainTabsScreen(rootNavController)
         }
 
+        composable("favorites") {
+            FavoritesScreen(rootNavController)
+        }
+
+        composable("ar_gallery") {
+            ARGalleryScreen(rootNavController)
+        }
+
+        composable("my_notes") {
+            MyNotesScreen(rootNavController)
+        }
+
         composable("ar_recognition") {
             LandmarkRecognitionScreen(
+                onNavigateBack = { rootNavController.popBackStack() },
+                onNavigateToDetails = { id, source ->
+                    rootNavController.navigate("recognized_info/${Uri.encode(id)}/$source")
+                }
+            )
+        }
+
+        composable(
+            route = "recognized_info/{landmarkId}/{source}",
+            arguments = listOf(
+                navArgument("landmarkId") { type = NavType.StringType },
+                navArgument("source") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val rawId = backStackEntry.arguments?.getString("landmarkId") ?: ""
+            val landmarkId = Uri.decode(rawId)
+            val sourceString = backStackEntry.arguments?.getString("source") ?: ""
+            val source = runCatching { LandmarkSource.valueOf(sourceString) }.getOrDefault(LandmarkSource.LOCAL_DB)
+
+            RecognizedLandmarkInfoScreen(
+                landmarkId = landmarkId,
+                source = source,
                 onNavigateBack = { rootNavController.popBackStack() }
             )
         }

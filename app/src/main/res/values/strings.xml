@@ -28,5 +28,7 @@
 
 
     <string name="arrived_message">Вы прибыли.</string>
+    <string name="profile_saved">Профиль сохранен</string>
+    <string name="note_saved">Заметка сохранена</string>
 
 </resources>

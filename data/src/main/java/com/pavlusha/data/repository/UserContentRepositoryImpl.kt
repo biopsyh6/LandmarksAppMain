@@ -1,6 +1,5 @@
 package com.pavlusha.data.repository
 
-import com.google.firebase.auth.FirebaseAuth
 import com.pavlusha.data.local.dao.UserContentDao
 import com.pavlusha.data.mapper.UserContentLocalDataMapper
 import com.pavlusha.data.mapper.exception.toAppExceptionDomainModel
@@ -13,6 +12,7 @@ import com.pavlusha.domain.model.UserNoteDomainModel
 import com.pavlusha.domain.model.VisitHistoryDomainModel
 import com.pavlusha.domain.model.exception.AppExceptionDomainModel
 import com.pavlusha.domain.repository.IUserContentRepository
+import kotlinx.coroutines.flow.first
 import java.io.File
 import java.util.UUID
 
@@ -58,6 +58,41 @@ class UserContentRepositoryImpl(
             val domainNotes = localNotes.map { UserContentLocalDataMapper.toDomainFromData(it) }
 
             TResult.Success(domainNotes)
+        } catch (e: Exception) {
+            TResult.Error(e.toAppExceptionDomainModel())
+        }
+    }
+
+    override suspend fun getAllUserNotes(userId: String): TResult<List<UserNoteDomainModel>, AppExceptionDomainModel> {
+        return try {
+            try {
+                val remoteNotes = userRemoteDataSource.getUserNotes(userId)
+                if (remoteNotes.isNotEmpty()) {
+                    val entitiesToSave = remoteNotes.map { remoteModel ->
+                        val domainModel = UserContentRemoteDataMapper.toDomainFromData(remoteModel)
+                        UserContentLocalDataMapper.fromDomainToData(domainModel)
+                    }
+                    userContentDao.insertNotes(entitiesToSave)
+                }
+            } catch (e: Exception) { e.printStackTrace() }
+
+            val localNotes = userContentDao.getAllNotesFlow(userId).first()
+            val domainNotes = localNotes.map { UserContentLocalDataMapper.toDomainFromData(it) }
+
+            TResult.Success(domainNotes)
+        } catch (e: Exception) {
+            TResult.Error(e.toAppExceptionDomainModel())
+        }
+    }
+
+    override suspend fun deleteNote(
+        noteId: String,
+        userId: String
+    ): TResult<Unit, AppExceptionDomainModel> {
+        return try {
+            userContentDao.deleteNoteById(noteId)
+            userRemoteDataSource.deleteUserNote(userId, noteId)
+            TResult.Success(Unit)
         } catch (e: Exception) {
             TResult.Error(e.toAppExceptionDomainModel())
         }

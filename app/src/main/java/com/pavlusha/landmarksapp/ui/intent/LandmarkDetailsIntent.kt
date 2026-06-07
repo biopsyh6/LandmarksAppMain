@@ -8,4 +8,5 @@ sealed interface LandmarkDetailsIntent {
     data class OnTabSelected(val tab: DetailsTab) : LandmarkDetailsIntent
     data object OnBackClicked : LandmarkDetailsIntent
     data object OnToggleFavorite : LandmarkDetailsIntent
+    data class OnSaveNoteClicked(val text: String) : LandmarkDetailsIntent
 }

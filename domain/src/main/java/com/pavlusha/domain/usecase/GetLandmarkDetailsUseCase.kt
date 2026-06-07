@@ -15,18 +15,16 @@ class GetLandmarkDetailsUseCase(
         id: String,
         source: LandmarkSource
     ): TResult<LandmarkDomainModel, AppExceptionDomainModel> {
-        return when (source) {
-            LandmarkSource.LOCAL_DB -> {
-                localRepository.getLandmarkById(id)
-            }
+        val primaryResult = localRepository.getLandmarkById(id)
 
-            LandmarkSource.REMOTE_API -> {
-                searchRepository.getExternalLandmarkDetails(id, source)
-            }
-
-            LandmarkSource.USER_ADDED -> {
-                localRepository.getLandmarkById(id)
-            }
+        if (primaryResult is TResult.Success) {
+            return primaryResult
         }
+
+        if (source == LandmarkSource.REMOTE_API) {
+            return searchRepository.getExternalLandmarkDetails(id, source)
+        }
+
+        return primaryResult
     }
 }

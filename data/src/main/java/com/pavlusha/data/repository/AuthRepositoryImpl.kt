@@ -1,6 +1,8 @@
 package com.pavlusha.data.repository
 
+import androidx.core.net.toUri
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.UserProfileChangeRequest
 import com.pavlusha.data.local.dao.UserDao
 import com.pavlusha.data.mapper.UserDataMapper
 import com.pavlusha.data.mapper.UserLocalDataMapper
@@ -113,6 +115,34 @@ class AuthRepositoryImpl(
     override suspend fun resetPassword(email: String): TResult<Unit, AppExceptionDomainModel> {
         return try {
             firebaseAuth.sendPasswordResetEmail(email).await()
+            TResult.Success(Unit)
+        } catch (e: Exception) {
+            TResult.Error(e.toAppExceptionDomainModel())
+        }
+    }
+
+    override suspend fun updateUserProfile(user: UserDomainModel): TResult<Unit, AppExceptionDomainModel> {
+        return try {
+            val firebaseUser = firebaseAuth.currentUser
+                ?: throw Exception("User not logged in")
+
+            val profileUpdates = UserProfileChangeRequest.Builder()
+                .setDisplayName(user.displayName)
+                .apply {
+                    if (user.photoUrl != null) {
+                        setPhotoUri(user.photoUrl!!.toUri())
+                    }
+                }
+                .build()
+
+            firebaseUser.updateProfile(profileUpdates).await()
+
+            val remoteUser = UserRemoteDataMapper.fromDomainToData(user)
+            userRemoteDataSource.saveUserProfile(remoteUser)
+
+            val localUser = UserLocalDataMapper.fromDomainToData(user)
+            userDao.insertUser(localUser)
+
             TResult.Success(Unit)
         } catch (e: Exception) {
             TResult.Error(e.toAppExceptionDomainModel())

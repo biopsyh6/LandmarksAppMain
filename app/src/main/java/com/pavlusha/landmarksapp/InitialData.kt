@@ -76,14 +76,21 @@ fun uploadInitialDataToFirestore() {
                 selectedPeriodId = null,
                 textAnnotations = listOf(
                     ARAnnotationRemoteModel(
-                        text = "Главная башня",
+                        text = "Мирский замок",
                         positionX = 0.0f,
-                        positionY = 1.2f,
+                        positionY = 0.5f,
                         positionZ = 0.0f,
                         colorHex = "#FFFFFF"
-                    )
+                    ),
+//                    ARAnnotationRemoteModel(
+//                        text = "Главная башня",
+//                        positionX = 0.0f,
+//                        positionY = 0.1f,
+//                        positionZ = 0.0f,
+//                        colorHex = "#FFFFFF"
+//                    ),
                 ),
-                modelScale = 0.5f,
+                modelScale = 1f,
                 heightOffset = 0.0f,
                 rotationDegrees = 0.0f,
                 showDistance = true,
@@ -149,16 +156,23 @@ fun uploadInitialDataToFirestore() {
                 selectedPeriodId = null,
                 textAnnotations = listOf(
                     ARAnnotationRemoteModel(
-                        text = "Смотровая площадка",
+                        text = "Национальная библиотека Беларуси",
                         positionX = 0.0f,
-                        positionY = 2.0f,
+                        positionY = 0.5f,
                         positionZ = 0.0f,
-                        colorHex = "#FFD700"
+                        colorHex = "#FFFFFF"
                     )
+//                    ARAnnotationRemoteModel(
+//                        text = "Смотровая площадка",
+//                        positionX = 0.0f,
+//                        positionY = 2.0f,
+//                        positionZ = 0.0f,
+//                        colorHex = "#FFD700"
+//                    )
                 ),
-                modelScale = 0.3f,
-                heightOffset = -0.5f,
-                rotationDegrees = 45.0f,
+                modelScale = 1.0f,
+                heightOffset = 0.0f,
+                rotationDegrees = 0.0f,
                 showDistance = true,
                 showCategory = true,
                 showPeriodName = false
@@ -216,13 +230,13 @@ fun uploadInitialDataToFirestore() {
                 activeModel3dPath = islandLandmark.remoteModel3dPath,
                 selectedPeriodId = null,
                 textAnnotations = listOf(ARAnnotationRemoteModel(
-                    text = "Остров",
+                    text = "Остров Мужества и Скорби",
                     positionX = 0.0f,
-                    positionY = 2.0f,
+                    positionY = 0.5f,
                     positionZ = 0.0f,
-                    colorHex = "#FFD700"
+                    colorHex = "#FFFFFF"
                 )),
-                modelScale = 0.8f,
+                modelScale = 1.0f,
                 heightOffset = 0.0f,
                 rotationDegrees = 0.0f,
                 showDistance = true,
@@ -281,14 +295,23 @@ fun uploadInitialDataToFirestore() {
                 placementType = "CENTER_SCREEN_HIT",
                 activeModel3dPath = bigbenLandmark.remoteModel3dPath,
                 selectedPeriodId = null,
-                textAnnotations = listOf(ARAnnotationRemoteModel(
-                    text = "Знаменитый циферблат",
-                    positionX = 0.0f,
-                    positionY = 1.5f,
-                    positionZ = 0.0f,
-                    colorHex = "#FFFFFF"
-                )),
-                modelScale = 0.5f,
+                textAnnotations = listOf(
+//                    ARAnnotationRemoteModel(
+//                    text = "Знаменитый циферблат",
+//                    positionX = 0.0f,
+//                    positionY = 1.5f,
+//                    positionZ = 0.0f,
+//                    colorHex = "#FFFFFF"
+//                    ),
+                    ARAnnotationRemoteModel(
+                        text = "Биг-Бен",
+                        positionX = 0.0f,
+                        positionY = 0.5f,
+                        positionZ = 0.0f,
+                        colorHex = "#FFFFFF"
+                    )
+                ),
+                modelScale = 1.0f,
                 heightOffset = 0.0f,
                 rotationDegrees = 0.0f,
                 showDistance = true,
@@ -348,14 +371,23 @@ fun uploadInitialDataToFirestore() {
                 placementType = "CENTER_SCREEN_HIT",
                 activeModel3dPath = nemigaChurchLandmark.remoteModel3dPath,
                 selectedPeriodId = null,
-                textAnnotations = listOf(ARAnnotationRemoteModel(
-                    text = "Главный фасад",
-                    positionX = 0.0f,
-                    positionY = 1.0f,
-                    positionZ = 0.5f,
-                    colorHex = "#FFFFFF"
-                )),
-                modelScale = 0.6f,
+                textAnnotations = listOf(
+//                    ARAnnotationRemoteModel(
+//                    text = "Главный фасад",
+//                    positionX = 0.0f,
+//                    positionY = 1.0f,
+//                    positionZ = 0.5f,
+//                    colorHex = "#FFFFFF"
+//                    )
+                    ARAnnotationRemoteModel(
+                        text = "Свято-Духов собор",
+                        positionX = 0.0f,
+                        positionY = 0.8f,
+                        positionZ = 0.0f,
+                        colorHex = "#FFFFFF"
+                    )
+                ),
+                modelScale = 0.8f,
                 heightOffset = 0.0f,
                 rotationDegrees = 0.0f,
                 showDistance = true,
@@ -391,7 +423,7 @@ fun uploadInitialDataToFirestore() {
                     type = "RUINS",
                     rawTypeName = "ancient_ruins"
                 ),
-                remoteModel3dPath = "https://biopsyh6.github.io/ar-landmarks-content/models/colosseum/colosseum.glb",
+                remoteModel3dPath = "https://biopsyh6.github.io/ar-landmarks-content/models/colosseum/colosseum_test.glb",
                 remoteMainImageUrl = "https://biopsyh6.github.io/ar-landmarks-content/images/colosseum/main.jpg",
                 thumbnailUrl = "https://biopsyh6.github.io/ar-landmarks-content/images/colosseum/thumbnailUrl.jpg",
                 galleryUrls = listOf(
@@ -417,14 +449,23 @@ fun uploadInitialDataToFirestore() {
                 placementType = "CENTER_SCREEN_HIT",
                 activeModel3dPath = colosseumLandmark.remoteModel3dPath,
                 selectedPeriodId = null,
-                textAnnotations = listOf(ARAnnotationRemoteModel(
-                    text = "Арена гладиаторов",
-                    positionX = 0.0f,
-                    positionY = 0.5f,
-                    positionZ = 0.0f,
-                    colorHex = "#FFA500"
-                )),
-                modelScale = 0.3f,
+                textAnnotations = listOf(
+//                    ARAnnotationRemoteModel(
+//                    text = "Арена гладиаторов",
+//                    positionX = 0.0f,
+//                    positionY = 0.5f,
+//                    positionZ = 0.0f,
+//                    colorHex = "#FFA500"
+//                    )
+                    ARAnnotationRemoteModel(
+                        text = "Колизей",
+                        positionX = 0.0f,
+                        positionY = 0.5f,
+                        positionZ = 0.0f,
+                        colorHex = "#FFFFFF"
+                    )
+                ),
+                modelScale = 1.0f,
                 heightOffset = 0.0f,
                 rotationDegrees = 0.0f,
                 showDistance = true,
@@ -483,15 +524,24 @@ fun uploadInitialDataToFirestore() {
                 placementType = "CENTER_SCREEN_HIT",
                 activeModel3dPath = eiffelLandmark.remoteModel3dPath,
                 selectedPeriodId = null,
-                textAnnotations = listOf(ARAnnotationRemoteModel(
-                    text = "Смотровая площадка",
-                    positionX = 0.0f,
-                    positionY = 2.5f,
-                    positionZ = 0.0f,
-                    colorHex = "#FFFFFF"
-                )),
-                modelScale = 0.2f,
-                heightOffset = -0.5f,
+                textAnnotations = listOf(
+//                    ARAnnotationRemoteModel(
+//                    text = "Смотровая площадка",
+//                    positionX = 0.0f,
+//                    positionY = 2.5f,
+//                    positionZ = 0.0f,
+//                    colorHex = "#FFFFFF"
+//                )
+                    ARAnnotationRemoteModel(
+                        text = "Эйфелева башня",
+                        positionX = 0.0f,
+                        positionY = 1.2f,
+                        positionZ = 0.0f,
+                        colorHex = "#FFFFFF"
+                    )
+                ),
+                modelScale = 1.0f,
+                heightOffset = 0.0f,
                 rotationDegrees = 0.0f,
                 showDistance = true,
                 showCategory = true,
@@ -552,15 +602,25 @@ fun uploadInitialDataToFirestore() {
                 placementType = "CENTER_SCREEN_HIT",
                 activeModel3dPath = isaacLandmark.remoteModel3dPath,
                 selectedPeriodId = null,
-                textAnnotations = listOf(ARAnnotationRemoteModel(
-                    text = "Золотой купол",
-                    positionX = 0.0f,
-                    positionY = 2.0f,
-                    positionZ = 0.0f,
-                    colorHex = "#FFD700"
-                )),
-                modelScale = 0.3f,
-                heightOffset = -0.5f,
+                textAnnotations = listOf(
+                    ARAnnotationRemoteModel(
+                        text = "Исаакиевский собор",
+                        positionX = 0.0f,
+                        positionY = 0.5f,
+                        positionZ = 0.0f,
+                        colorHex = "#FFFFFF"
+                    ),
+//                    ARAnnotationRemoteModel(
+//                    text = "Золотой купол",
+//                    positionX = 0.0f,
+//                    positionY = 2.0f,
+//                    positionZ = 0.0f,
+//                    colorHex = "#FFD700"
+//                    ),
+
+                ),
+                modelScale = 1.0f,
+                heightOffset = 0.0f,
                 rotationDegrees = 0.0f,
                 showDistance = true,
                 showCategory = true,
@@ -624,15 +684,22 @@ fun uploadInitialDataToFirestore() {
                 selectedPeriodId = null,
                 textAnnotations = listOf(
                     ARAnnotationRemoteModel(
-                        text = "Трофейные часы",
-                        positionX = -0.5f,
-                        positionY = 1.8f,
+                        text = "Ворота Минска",
+                        positionX = 0.0f,
+                        positionY = 0.5f,
                         positionZ = 0.0f,
                         colorHex = "#FFFFFF"
-                    )
+                    ),
+//                    ARAnnotationRemoteModel(
+//                        text = "Трофейные часы",
+//                        positionX = -0.5f,
+//                        positionY = 1.8f,
+//                        positionZ = 0.0f,
+//                        colorHex = "#FFFFFF"
+//                    )
                 ),
-                modelScale = 0.4f,
-                heightOffset = -0.2f,
+                modelScale = 1.0f,
+                heightOffset = 0.0f,
                 rotationDegrees = 0.0f,
                 showDistance = true,
                 showCategory = true,
@@ -692,15 +759,24 @@ fun uploadInitialDataToFirestore() {
                 placementType = "CENTER_SCREEN_HIT",
                 activeModel3dPath = pisaLandmark.remoteModel3dPath,
                 selectedPeriodId = null,
-                textAnnotations = listOf(ARAnnotationRemoteModel(
-                    text = "Знаменитый наклон",
-                    positionX = 0.5f,
-                    positionY = 1.5f,
-                    positionZ = 0.0f,
-                    colorHex = "#FFFFFF"
-                )),
-                modelScale = 0.5f,
-                heightOffset = -0.5f,
+                textAnnotations = listOf(
+                    ARAnnotationRemoteModel(
+                        text = "Пизанская башня",
+                        positionX = 0.0f,
+                        positionY = 1.5f,
+                        positionZ = 0.0f,
+                        colorHex = "#FFFFFF"
+                    )
+//                    ARAnnotationRemoteModel(
+//                    text = "Знаменитый наклон",
+//                    positionX = 0.5f,
+//                    positionY = 1.5f,
+//                    positionZ = 0.0f,
+//                    colorHex = "#FFFFFF"
+//                    )
+                ),
+                modelScale = 1.0f,
+                heightOffset = 0.0f,
                 rotationDegrees = 0.0f,
                 showDistance = true,
                 showCategory = true,
@@ -760,16 +836,25 @@ fun uploadInitialDataToFirestore() {
                 placementType = "CENTER_SCREEN_HIT",
                 activeModel3dPath = sphinxLandmark.remoteModel3dPath,
                 selectedPeriodId = null,
-                textAnnotations = listOf(ARAnnotationRemoteModel(
-                    text = "Лицо фараона",
-                    positionX = 0.0f,
-                    positionY = 1.2f,
-                    positionZ = 0.0f,
-                    colorHex = "#FFFFFF"
-                )),
-                modelScale = 0.4f,
-                heightOffset = -0.3f,
-                rotationDegrees = -90.0f,
+                textAnnotations = listOf(
+                    ARAnnotationRemoteModel(
+                        text = "Большой сфинкс",
+                        positionX = 0.0f,
+                        positionY = 0.8f,
+                        positionZ = 0.0f,
+                        colorHex = "#FFFFFF"
+                    )
+//                    ARAnnotationRemoteModel(
+//                    text = "Лицо фараона",
+//                    positionX = 0.0f,
+//                    positionY = 1.2f,
+//                    positionZ = 0.0f,
+//                    colorHex = "#FFFFFF"
+//                )
+                ),
+                modelScale = 1.0f,
+                heightOffset = 0.0f,
+                rotationDegrees = 0.0f,
                 showDistance = true,
                 showCategory = true,
                 showPeriodName = false
@@ -829,15 +914,24 @@ fun uploadInitialDataToFirestore() {
                 placementType = "CENTER_SCREEN_HIT",
                 activeModel3dPath = tajMahalLandmark.remoteModel3dPath,
                 selectedPeriodId = null,
-                textAnnotations = listOf(ARAnnotationRemoteModel(
-                    text = "Главный купол",
-                    positionX = 0.0f,
-                    positionY = 1.5f,
-                    positionZ = 0.0f,
-                    colorHex = "#FFFFFF"
-                )),
-                modelScale = 0.25f,
-                heightOffset = -0.5f,
+                textAnnotations = listOf(
+                    ARAnnotationRemoteModel(
+                        text = "Тадж-Махал",
+                        positionX = 0.0f,
+                        positionY = 0.9f,
+                        positionZ = 0.0f,
+                        colorHex = "#FFFFFF"
+                    ),
+//                    ARAnnotationRemoteModel(
+//                    text = "Главный купол",
+//                    positionX = 0.0f,
+//                    positionY = 1.5f,
+//                    positionZ = 0.0f,
+//                    colorHex = "#FFFFFF"
+//                )
+                ),
+                modelScale = 1.0f,
+                heightOffset = 0.0f,
                 rotationDegrees = 0.0f,
                 showDistance = true,
                 showCategory = true,
@@ -898,14 +992,23 @@ fun uploadInitialDataToFirestore() {
                 placementType = "CENTER_SCREEN_HIT",
                 activeModel3dPath = towerBridgeLandmark.remoteModel3dPath,
                 selectedPeriodId = null,
-                textAnnotations = listOf(ARAnnotationRemoteModel(
-                    text = "Верхние галереи",
-                    positionX = 0.0f,
-                    positionY = 1.8f,
-                    positionZ = 0.0f,
-                    colorHex = "#FFFFFF"
-                )),
-                modelScale = 0.35f,
+                textAnnotations = listOf(
+                    ARAnnotationRemoteModel(
+                        text = "Тауэрский мост",
+                        positionX = 0.0f,
+                        positionY = 0.5f,
+                        positionZ = 0.0f,
+                        colorHex = "#FFFFFF"
+                    ),
+//                    ARAnnotationRemoteModel(
+//                    text = "Верхние галереи",
+//                    positionX = 0.0f,
+//                    positionY = 1.8f,
+//                    positionZ = 0.0f,
+//                    colorHex = "#FFFFFF"
+//                )
+                ),
+                modelScale = 1.0f,
                 heightOffset = 0.0f,
                 rotationDegrees = 0.0f,
                 showDistance = true,
@@ -966,15 +1069,24 @@ fun uploadInitialDataToFirestore() {
                 placementType = "CENTER_SCREEN_HIT",
                 activeModel3dPath = townhallLandmark.remoteModel3dPath,
                 selectedPeriodId = null,
-                textAnnotations = listOf(ARAnnotationRemoteModel(
-                    text = "Башенные часы",
-                    positionX = 0.0f,
-                    positionY = 2.0f,
-                    positionZ = 0.5f,
-                    colorHex = "#FFD700"
-                )),
-                modelScale = 0.6f,
-                heightOffset = -0.2f,
+                textAnnotations = listOf(
+                    ARAnnotationRemoteModel(
+                        text = "Минская ратуша",
+                        positionX = 0.0f,
+                        positionY = 0.5f,
+                        positionZ = 0.0f,
+                        colorHex = "#FFFFFF"
+                    ),
+//                    ARAnnotationRemoteModel(
+//                    text = "Башенные часы",
+//                    positionX = 0.0f,
+//                    positionY = 2.0f,
+//                    positionZ = 0.5f,
+//                    colorHex = "#FFD700"
+//                )
+                ),
+                modelScale = 1.0f,
+                heightOffset = 0.0f,
                 rotationDegrees = 0.0f,
                 showDistance = true,
                 showCategory = true,

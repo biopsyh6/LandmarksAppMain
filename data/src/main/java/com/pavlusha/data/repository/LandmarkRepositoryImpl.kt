@@ -126,6 +126,16 @@ class LandmarkRepositoryImpl(
         }
     }
 
+    override suspend fun getFavoriteLandmarks(): TResult<List<LandmarkDomainModel>, AppExceptionDomainModel> {
+        return try {
+            val favoritesLocal = landmarkDao.getFavoriteLandmarks()
+            val domainList = favoritesLocal.map { LandmarkLocalDataMapper.toDomainFromData(it) }
+            TResult.Success(domainList)
+        } catch (e: Exception) {
+            TResult.Error(e.toAppExceptionDomainModel())
+        }
+    }
+
     override suspend fun searchLandmarks(query: String): TResult<List<LandmarkDomainModel>, AppExceptionDomainModel> {
         return try {
             val results = landmarkDao.searchLandmarks(query)

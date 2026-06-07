@@ -27,5 +27,7 @@ interface ILandmarkRepository {
         isFavourite: Boolean,
     ): TResult<Unit, AppExceptionDomainModel>
 
+    suspend fun getFavoriteLandmarks(): TResult<List<LandmarkDomainModel>, AppExceptionDomainModel>
+
     suspend fun searchLandmarks(query: String): TResult<List<LandmarkDomainModel>, AppExceptionDomainModel>
 }
