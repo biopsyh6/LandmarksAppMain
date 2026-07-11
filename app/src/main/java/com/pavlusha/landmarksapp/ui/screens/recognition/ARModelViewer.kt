@@ -1,5 +1,9 @@
 package com.pavlusha.landmarksapp.ui.screens.recognition
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -60,109 +64,132 @@ fun ARModelViewer(
 
     var anchor by remember { mutableStateOf<Anchor?>(null) }
 
-    ARSceneView(
-        modifier = Modifier.fillMaxSize(),
-        engine = engine,
-        modelLoader = modelLoader,
-        environmentLoader = environmentLoader,
-        cameraNode = cameraNode,
-        planeRenderer = true,
-        sessionConfiguration = { session, config ->
-            config.lightEstimationMode = Config.LightEstimationMode.ENVIRONMENTAL_HDR
-        },
-        onSessionUpdated = { _, frame ->
-            if (anchor == null) {
-                anchor = frame.getUpdatedPlanes()
-                    .firstOrNull { plane ->
-                        plane.type == Plane.Type.HORIZONTAL_UPWARD_FACING &&
-                                plane.trackingState == TrackingState.TRACKING
-                    }
-                    ?.let { plane -> plane.createAnchor(plane.centerPose) }
-            }
-        }
-    ) {
-        anchor?.let { validAnchor ->
-            AnchorNode(anchor = validAnchor) {
+    Box(modifier = Modifier.fillMaxSize()) {
 
-                modelInstance?.let { instance ->
-                    ModelNode(
-                        modelInstance = instance,
-                        scaleToUnits = modelScale,
-                        position = Position(x = 0.0f, y = heightOffset, z = 0.0f),
-                        rotation = io.github.sceneview.math.Rotation(
-                            x = 0.0f,
-                            y = rotationDegrees,
-                            z = 0.0f
-                        ),
-                        autoAnimate = true
-                    )
+        ARSceneView(
+            modifier = Modifier.fillMaxSize(),
+            engine = engine,
+            modelLoader = modelLoader,
+            environmentLoader = environmentLoader,
+            cameraNode = cameraNode,
+            planeRenderer = true,
+            sessionConfiguration = { session, config ->
+                config.lightEstimationMode = Config.LightEstimationMode.ENVIRONMENTAL_HDR
+            },
+            onSessionUpdated = { _, frame ->
+                if (anchor == null) {
+                    anchor = frame.getUpdatedPlanes()
+                        .firstOrNull { plane ->
+                            plane.type == Plane.Type.HORIZONTAL_UPWARD_FACING &&
+                                    plane.trackingState == TrackingState.TRACKING
+                        }
+                        ?.let { plane -> plane.createAnchor(plane.centerPose) }
                 }
+            }
+        ) {
+            anchor?.let { validAnchor ->
+                AnchorNode(anchor = validAnchor) {
 
-                annotations.forEach { annotation ->
-                    ViewNode(
-                        windowManager = viewNodeManager,
-                        position = Position(
-                            x = annotation.positionX,
-                            y = annotation.positionY,
-                            z = annotation.positionZ
-                        ),
+                    modelInstance?.let { instance ->
+                        ModelNode(
+                            modelInstance = instance,
+                            scaleToUnits = modelScale,
+                            position = Position(x = 0.0f, y = heightOffset, z = 0.0f),
+                            rotation = io.github.sceneview.math.Rotation(
+                                x = 0.0f,
+                                y = rotationDegrees,
+                                z = 0.0f
+                            ),
+                            autoAnimate = true
+                        )
+                    }
 
-                        scale = Scale(0.5f),
-                        apply = {
-                            onFrame = {
-                                lookAt(cameraNode)
+                    annotations.forEach { annotation ->
+                        ViewNode(
+                            windowManager = viewNodeManager,
+                            position = Position(
+                                x = annotation.positionX,
+                                y = annotation.positionY,
+                                z = annotation.positionZ
+                            ),
+
+                            scale = Scale(0.5f),
+                            apply = {
+                                onFrame = {
+                                    lookAt(cameraNode)
 
 //                                rotation = io.github.sceneview.math.Rotation(
 //                                    x = rotation.x,
 //                                    y = rotation.y + 180f,
 //                                    z = rotation.z
 //                                )
-                            }
-                        },
-                        viewContent = {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier.padding(bottom = 8.dp)
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .background(
-                                            color = Color(0xB3000000),
-                                            shape = RoundedCornerShape(12.dp)
-                                        )
-                                        .border(
-                                            width = 1.dp,
-                                            color = Color.White.copy(alpha = 0.3f), // Стеклянная полупрозрачная обводка
-                                            shape = RoundedCornerShape(12.dp)
-                                        )
-                                        .padding(horizontal = 16.dp, vertical = 10.dp)
+                                }
+                            },
+                            viewContent = {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier.padding(bottom = 8.dp)
                                 ) {
-                                    Text(
-                                        text = annotation.text,
-                                        color = Color(annotation.colorHex.toColorInt()),
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        letterSpacing = 0.5.sp
+                                    Box(
+                                        modifier = Modifier
+                                            .background(
+                                                color = Color(0xB3000000),
+                                                shape = RoundedCornerShape(12.dp)
+                                            )
+                                            .border(
+                                                width = 1.dp,
+                                                color = Color.White.copy(alpha = 0.3f), // Стеклянная полупрозрачная обводка
+                                                shape = RoundedCornerShape(12.dp)
+                                            )
+                                            .padding(horizontal = 16.dp, vertical = 10.dp)
+                                    ) {
+                                        Text(
+                                            text = annotation.text,
+                                            color = Color(annotation.colorHex.toColorInt()),
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            letterSpacing = 0.5.sp
+                                        )
+                                    }
+
+                                    Box(
+                                        modifier = Modifier
+                                            .width(2.dp)
+                                            .height(24.dp)
+                                            .background(Color.White.copy(alpha = 0.4f))
+                                    )
+
+                                    Box(
+                                        modifier = Modifier
+                                            .size(8.dp)
+                                            .background(color = Color.White, shape = CircleShape)
                                     )
                                 }
-
-                                Box(
-                                    modifier = Modifier
-                                        .width(2.dp)
-                                        .height(24.dp)
-                                        .background(Color.White.copy(alpha = 0.4f))
-                                )
-
-                                Box(
-                                    modifier = Modifier
-                                        .size(8.dp)
-                                        .background(color = Color.White, shape = CircleShape)
-                                )
                             }
-                        }
-                    )
+                        )
+                    }
                 }
             }
+        }
+
+        AnimatedVisibility(
+            visible = anchor == null,
+            enter = fadeIn(animationSpec = tween(500)),
+            exit = fadeOut(animationSpec = tween(500)),
+            modifier = Modifier.align(Alignment.Center)
+        ) {
+            Text(
+                text = "Наведите на плоскую поверхность",
+                color = Color.White,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier
+                    .background(
+                        color = Color.Black.copy(alpha = 0.6f),
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                    .padding(horizontal = 20.dp, vertical = 12.dp)
+            )
         }
     }
 }

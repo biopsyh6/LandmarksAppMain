@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.pavlusha.domain.TResult
 import com.pavlusha.domain.model.SearchResultDomainModel
 import com.pavlusha.domain.model.exception.AppExceptionDomainModel
+import com.pavlusha.domain.usecase.AddToHistoryUseCase
 import com.pavlusha.domain.usecase.GetPedestrianRouteUseCase
 import com.pavlusha.domain.usecase.GetUserLocationUseCase
 import com.pavlusha.domain.usecase.ObserveUserLocationUseCase
@@ -34,6 +35,7 @@ class MapViewModel(
     private val searchLandmarksUseCase: SearchLandmarksUseCase,
     private val searchLandmarksAtPointUseCase: SearchLandmarksAtPointUseCase,
     private val getPedestrianRouteUseCase: GetPedestrianRouteUseCase,
+    private val addToHistoryUseCase: AddToHistoryUseCase,
     private val ioDispatcher: CoroutineDispatcher
 ) : ViewModel() {
     private val _state = MutableStateFlow(MapState())
@@ -43,6 +45,9 @@ class MapViewModel(
     val event = _event.flow
 
     private var locationObservationJob: Job? = null
+
+    private val VISIT_RADIUS_METERS = 50f
+    private val MIN_VISIT_DURATION_SEC = 10
 
     fun onIntent(intent: MapIntent) {
         when(intent) {
@@ -67,16 +72,30 @@ class MapViewModel(
             is MapIntent.OnSearchExecute -> handleTextSearch()
             is MapIntent.OnSearchNearby -> handleNearbySearch()
             is MapIntent.OnLandmarkClicked -> {
+
+                finishCurrentVisitIfAny()
+
                 val loc = state.value.userLocation
                 val dist = if (loc != null) {
                     val results = FloatArray(1)
                     Location.distanceBetween(loc.latitude, loc.longitude, intent.landmark.latitude, intent.landmark.longitude, results)
                     results[0]
                 } else null
-                _state.update { it.copy(selectedLandmark = intent.landmark, distanceToSelected = dist) }
+                _state.update { it.copy(
+                    selectedLandmark = intent.landmark,
+                    distanceToSelected = dist,
+                    isVisiting = false,
+                    visitStartTime = null
+                ) }
             }
             is MapIntent.OnCloseLandmarkInfo -> {
-                _state.update { it.copy(selectedLandmark = null, currentRoute = null) }
+                finishCurrentVisitIfAny()
+                _state.update { it.copy(
+                    selectedLandmark = null,
+                    currentRoute = null,
+                    isVisiting = false,
+                    visitStartTime = null
+                ) }
             }
             is MapIntent.OnLandmarkDetailsClicked -> handleLandmarkDetailsClicked(intent.landmark)
             is MapIntent.OnBuildRouteClicked -> handleBuildRouteClicked()
@@ -158,6 +177,9 @@ class MapViewModel(
                     var newDistance: Float? = currentState.distanceToSelected
                     var routeFinished = false
 
+                    var newIsVisiting = currentState.isVisiting
+                    var newVisitStartTime = currentState.visitStartTime
+
                     currentState.selectedLandmark?.let { target ->
                         val results = FloatArray(1)
                         Location.distanceBetween(
@@ -170,6 +192,21 @@ class MapViewModel(
                         if (currentState.currentRoute != null && newDistance!! < 20f) {
                             routeFinished = true
                         }
+
+                        val isInsideRadius = newDistance!! <= VISIT_RADIUS_METERS
+
+                        if (isInsideRadius && !currentState.isVisiting) {
+                            newIsVisiting = true
+                            newVisitStartTime = System.currentTimeMillis()
+                        } else if (!isInsideRadius && currentState.isVisiting) {
+                            newIsVisiting = false
+                            val durationSeconds = ((System.currentTimeMillis() - (currentState.visitStartTime ?: System.currentTimeMillis())) / 1000).toInt()
+
+                            if (durationSeconds >= MIN_VISIT_DURATION_SEC) {
+                                saveVisitHistory(target.id, durationSeconds)
+                            }
+                            newVisitStartTime = null
+                        }
                     }
 
                     _state.update {
@@ -180,6 +217,8 @@ class MapViewModel(
                             isLoading = false,
                             isTrackingActive = if (it.isFirstLocationFix) true else it.isTrackingActive,
                             isFirstLocationFix = false,
+                            isVisiting = newIsVisiting,
+                            visitStartTime = newVisitStartTime,
                             error = null
                         )
                     }
@@ -188,6 +227,22 @@ class MapViewModel(
                         _event.emit(MapEvent.ShowToast(R.string.arrived_message))
                     }
                 }
+        }
+    }
+
+    private fun finishCurrentVisitIfAny() {
+        val currentState = _state.value
+        if (currentState.isVisiting && currentState.selectedLandmark != null && currentState.visitStartTime != null) {
+            val durationSeconds = ((System.currentTimeMillis() - currentState.visitStartTime) / 1000).toInt()
+            if (durationSeconds >= MIN_VISIT_DURATION_SEC) {
+                saveVisitHistory(currentState.selectedLandmark.id, durationSeconds)
+            }
+        }
+    }
+
+    private fun saveVisitHistory(landmarkId: String, durationSeconds: Int) {
+        viewModelScope.launch {
+            addToHistoryUseCase(landmarkId, durationSeconds)
         }
     }
 

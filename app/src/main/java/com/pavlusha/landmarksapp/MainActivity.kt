@@ -55,6 +55,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.google.firebase.auth.FirebaseAuth
 import com.pavlusha.domain.model.LandmarkSource
 import com.pavlusha.landmarksapp.ml.Model
 import com.pavlusha.landmarksapp.ui.screens.ARGalleryScreen
@@ -67,6 +68,7 @@ import com.pavlusha.landmarksapp.ui.screens.MyNotesScreen
 import com.pavlusha.landmarksapp.ui.screens.RecognizedLandmarkInfoScreen
 import com.pavlusha.landmarksapp.ui.screens.RegisterScreen
 import com.pavlusha.landmarksapp.ui.screens.ResetPasswordScreen
+import com.pavlusha.landmarksapp.ui.screens.VisitHistoryScreen
 import com.pavlusha.landmarksapp.ui.theme.LandmarksAppTheme
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
@@ -302,9 +304,12 @@ fun LandmarkClassifierScreen(
 fun Main() {
     val rootNavController = rememberNavController()
 
+    val auth = FirebaseAuth.getInstance()
+    val startDest = if (auth.currentUser != null) "main_content" else "auth"
+
     NavHost(
         navController = rootNavController,
-        startDestination = "auth"
+        startDestination = startDest
     ) {
         navigation(route = "auth", startDestination = "login") {
             composable("login") { LoginScreen(rootNavController) }
@@ -326,6 +331,10 @@ fun Main() {
 
         composable("my_notes") {
             MyNotesScreen(rootNavController)
+        }
+
+        composable("visit_history") {
+            VisitHistoryScreen(rootNavController)
         }
 
         composable("ar_recognition") {

@@ -10,6 +10,7 @@ import com.pavlusha.landmarksapp.ui.viewmodel.ProfileViewModel
 import com.pavlusha.landmarksapp.ui.viewmodel.RecognitionViewModel
 import com.pavlusha.landmarksapp.ui.viewmodel.RegisterViewModel
 import com.pavlusha.landmarksapp.ui.viewmodel.ResetPasswordViewModel
+import com.pavlusha.landmarksapp.ui.viewmodel.VisitHistoryViewModel
 import kotlinx.coroutines.Dispatchers
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -42,7 +43,8 @@ val appModule = module {
             searchLandmarksUseCase = get(),
             searchLandmarksAtPointUseCase = get(),
             ioDispatcher = get(),
-            getPedestrianRouteUseCase = get()
+            getPedestrianRouteUseCase = get(),
+            addToHistoryUseCase = get()
         )
     }
 
@@ -59,7 +61,9 @@ val appModule = module {
         RecognitionViewModel(
             identifyLandmarkUseCase = get(),
             getARContentForLandmarkUseCase = get(),
-            saveARPhotoUseCase = get()
+            saveARPhotoUseCase = get(),
+            observeUserLocationUseCase = get(),
+            observeCompassHeadingUseCase = get()
         )
     }
 
@@ -74,7 +78,8 @@ val appModule = module {
     viewModel<FavoritesViewModel> {
         FavoritesViewModel(
             getFavoriteLandmarksUseCase = get(),
-            toggleFavoriteUseCase = get()
+            toggleFavoriteUseCase = get(),
+            getWikipediaInfoUseCase = get()
         )
     }
 
@@ -90,6 +95,13 @@ val appModule = module {
             getAllNotesWithLandmarksUseCase = get(),
             deleteNoteUseCase = get(),
             updateNoteUseCase = get()
+        )
+    }
+
+    viewModel<VisitHistoryViewModel> {
+        VisitHistoryViewModel(
+            getVisitHistoryWithLandmarksUseCase = get(),
+            getWikipediaInfoUseCase = get()
         )
     }
 }

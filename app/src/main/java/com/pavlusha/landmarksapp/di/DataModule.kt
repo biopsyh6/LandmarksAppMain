@@ -15,14 +15,17 @@ import com.pavlusha.data.remote.YandexSearchDataSource
 import com.pavlusha.data.remote.api.IWikipediaApi
 import com.pavlusha.data.repository.ARContentRepositoryImpl
 import com.pavlusha.data.repository.AuthRepositoryImpl
+import com.pavlusha.data.repository.CompassRepositoryImpl
 import com.pavlusha.data.repository.LandmarkRepositoryImpl
 import com.pavlusha.data.repository.LandmarkSearchRepositoryImpl
 import com.pavlusha.data.repository.LocationRepositoryImpl
 import com.pavlusha.data.repository.RecognitionRepositoryImpl
 import com.pavlusha.data.repository.RoutingRepositoryImpl
 import com.pavlusha.data.repository.UserContentRepositoryImpl
+import com.pavlusha.data.sensor.DeviceCompass
 import com.pavlusha.domain.repository.IARContentRepository
 import com.pavlusha.domain.repository.IAuthRepository
+import com.pavlusha.domain.repository.ICompassRepository
 import com.pavlusha.domain.repository.ILandmarkRepository
 import com.pavlusha.domain.repository.ILandmarkSearchRepository
 import com.pavlusha.domain.repository.ILocationRepository
@@ -129,6 +132,12 @@ val dataModule = module {
         )
     }
 
+    single<ICompassRepository> {
+        CompassRepositoryImpl(
+            deviceCompass = get()
+        )
+    }
+
     single {
         SearchFactory.getInstance().createSearchManager(SearchManagerType.COMBINED)
     }
@@ -167,5 +176,9 @@ val dataModule = module {
 
     single {
         YandexRoutingDataSource(pedestrianRouter = get())
+    }
+
+    single {
+        DeviceCompass(context = androidContext())
     }
 }

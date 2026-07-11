@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.Collections
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.ButtonDefaults
@@ -236,6 +237,12 @@ fun ProfileScreen(
                             icon = Icons.AutoMirrored.Filled.Notes,
                             title = "Мои заметки",
                             onClick = { viewModel.onIntent(ProfileIntent.OnMenuItemClicked("my_notes")) }
+                        )
+
+                        ProfileMenuItem(
+                            icon = Icons.Default.History,
+                            title = "История посещений",
+                            onClick = { viewModel.onIntent(ProfileIntent.OnMenuItemClicked("visit_history")) }
                         )
 
                         Spacer(modifier = Modifier.weight(1f))

@@ -24,6 +24,8 @@ interface IUserContentRepository {
         visit: VisitHistoryDomainModel
     ): TResult<Unit, AppExceptionDomainModel>
 
+    suspend fun getUserVisitHistory(userId: String): TResult<List<VisitHistoryDomainModel>, AppExceptionDomainModel>
+
     suspend fun saveARPhoto(
         landmarkId: String,
         userId: String,

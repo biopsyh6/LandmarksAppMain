@@ -18,9 +18,11 @@ import com.pavlusha.domain.usecase.GetNotesForLandmarkUseCase
 import com.pavlusha.domain.usecase.GetPedestrianRouteUseCase
 import com.pavlusha.domain.usecase.GetUserGalleryUseCase
 import com.pavlusha.domain.usecase.GetUserLocationUseCase
+import com.pavlusha.domain.usecase.GetVisitHistoryWithLandmarksUseCase
 import com.pavlusha.domain.usecase.GetWikipediaInfoUseCase
 import com.pavlusha.domain.usecase.IdentifyLandmarkUseCase
 import com.pavlusha.domain.usecase.ObserveAuthStateUseCase
+import com.pavlusha.domain.usecase.ObserveCompassHeadingUseCase
 import com.pavlusha.domain.usecase.ObserveUserLocationUseCase
 import com.pavlusha.domain.usecase.RecognizeLandmarkUseCase
 import com.pavlusha.domain.usecase.ResetPasswordUseCase
@@ -241,6 +243,20 @@ val domainModule = module {
         UpdateNoteUseCase(
             userContentRepository = get(),
             authRepository = get()
+        )
+    }
+
+    factory<GetVisitHistoryWithLandmarksUseCase> {
+        GetVisitHistoryWithLandmarksUseCase(
+            userContentRepository = get(),
+            landmarkRepository = get(),
+            authRepository = get()
+        )
+    }
+
+    factory<ObserveCompassHeadingUseCase> {
+        ObserveCompassHeadingUseCase(
+            compassRepository = get()
         )
     }
 }

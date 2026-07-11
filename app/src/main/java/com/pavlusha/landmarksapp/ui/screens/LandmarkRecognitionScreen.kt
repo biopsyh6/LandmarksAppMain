@@ -1,7 +1,6 @@
 package com.pavlusha.landmarksapp.ui.screens
 
 import android.Manifest
-import android.app.Activity
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Handler
@@ -22,8 +21,10 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,6 +32,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -47,34 +50,44 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.ar.core.ArCoreApk
+import com.pavlusha.landmarksapp.R
+import com.pavlusha.landmarksapp.ui.screens.common.formatDistance
 import com.pavlusha.landmarksapp.ui.screens.recognition.ARModelViewer
 import com.pavlusha.landmarksapp.ui.screens.recognition.CameraScanner
 import com.pavlusha.landmarksapp.ui.state.RecognitionMode
 import com.pavlusha.landmarksapp.ui.viewmodel.RecognitionViewModel
+import com.yandex.mapkit.MapKitFactory
 import io.github.sceneview.SceneView
 import io.github.sceneview.math.Position
 import io.github.sceneview.rememberCameraNode
@@ -84,10 +97,6 @@ import io.github.sceneview.rememberModelInstance
 import io.github.sceneview.rememberModelLoader
 import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
-import androidx.core.graphics.createBitmap
-import kotlinx.coroutines.launch
-
-
 
 
 fun findSurfaceView(view: View): SurfaceView? {
@@ -100,6 +109,7 @@ fun findSurfaceView(view: View): SurfaceView? {
     }
     return null
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LandmarkRecognitionScreen(
@@ -110,6 +120,8 @@ fun LandmarkRecognitionScreen(
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
     val localView = LocalView.current
+
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     var isCapturing by remember { mutableStateOf(false) }
 
@@ -135,6 +147,21 @@ fun LandmarkRecognitionScreen(
             }
         }
     )
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_START -> MapKitFactory.getInstance().onStart()
+                Lifecycle.Event.ON_STOP -> MapKitFactory.getInstance().onStop()
+                else -> {}
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     LaunchedEffect(Unit) {
         if (!hasCameraPermission) {
@@ -221,6 +248,75 @@ fun LandmarkRecognitionScreen(
                                         Text("Для этого объекта нет 3D модели", color = Color.White)
                                     }
                                 }
+
+                                if (state.recognizedLandmark != null && !isCapturing) {
+                                    Surface(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(top = 16.dp, start = 24.dp, end = 24.dp)
+                                            .align(Alignment.TopCenter),
+                                        shape = RoundedCornerShape(16.dp),
+                                        color = Color(0xB3000000),
+                                        shadowElevation = 6.dp
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(
+                                                horizontal = 20.dp,
+                                                vertical = 14.dp
+                                            ),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                Text(
+                                                    text = state.recognizedLandmark!!.name,
+                                                    color = Color.White,
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 16.sp,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
+                                            }
+
+                                            Spacer(modifier = Modifier.width(16.dp))
+                                            Text(
+                                                text = formatDistance(state.distanceMeters),
+                                                color = colorResource(id = R.color.white),
+                                                fontWeight = FontWeight.Black,
+                                                fontSize = 18.sp
+                                            )
+                                        }
+                                    }
+                                }
+
+                                if (state.navigationBearing != null && !isCapturing) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(bottom = 120.dp),
+                                        contentAlignment = Alignment.BottomCenter
+                                    ) {
+                                        Surface(
+                                            modifier = Modifier.size(70.dp),
+                                            shape = CircleShape,
+                                            color = Color.Black.copy(alpha = 0.5f)
+                                        ) {
+                                            Box(contentAlignment = Alignment.Center) {
+                                                Icon(
+                                                    painter = painterResource(id = R.drawable.outline_arrow_upward_24),
+                                                    contentDescription = "Направление",
+                                                    tint = colorResource(id = R.color.red),
+                                                    modifier = Modifier
+                                                        .size(40.dp)
+                                                        .graphicsLayer(
+                                                            rotationZ = state.navigationBearing!!
+                                                        )
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+
                                 if (!modelUrl.isNullOrBlank()) {
 
                                     FloatingActionButton(
@@ -244,23 +340,42 @@ fun LandmarkRecognitionScreen(
                                                         isCapturing = false
                                                         if (copyResult == PixelCopy.SUCCESS) {
                                                             state.recognizedLandmark?.id?.let { id ->
-                                                                viewModel.saveARPhoto(id, bitmap) { isSuccess ->
+                                                                viewModel.saveARPhoto(
+                                                                    id,
+                                                                    bitmap
+                                                                ) { isSuccess ->
                                                                     if (isSuccess) {
-                                                                        Toast.makeText(context, "Фото сохранено в AR Галерею!", Toast.LENGTH_SHORT).show()
+                                                                        Toast.makeText(
+                                                                            context,
+                                                                            "Фото сохранено в AR Галерею!",
+                                                                            Toast.LENGTH_SHORT
+                                                                        ).show()
                                                                     } else {
-                                                                        Toast.makeText(context, "Ошибка при сохранении", Toast.LENGTH_SHORT).show()
+                                                                        Toast.makeText(
+                                                                            context,
+                                                                            "Ошибка при сохранении",
+                                                                            Toast.LENGTH_SHORT
+                                                                        ).show()
                                                                     }
                                                                 }
                                                             }
                                                         } else {
-                                                            Toast.makeText(context, "Ошибка захвата AR сцены", Toast.LENGTH_SHORT).show()
+                                                            Toast.makeText(
+                                                                context,
+                                                                "Ошибка захвата AR сцены",
+                                                                Toast.LENGTH_SHORT
+                                                            ).show()
                                                         }
                                                     },
                                                     Handler(Looper.getMainLooper())
                                                 )
                                             } else {
                                                 isCapturing = false
-                                                Toast.makeText(context, "AR слой не найден", Toast.LENGTH_SHORT).show()
+                                                Toast.makeText(
+                                                    context,
+                                                    "AR слой не найден",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
                                             }
                                         },
                                         modifier = Modifier
@@ -270,7 +385,11 @@ fun LandmarkRecognitionScreen(
                                         contentColor = Color.Black
                                     ) {
                                         if (isCapturing) {
-                                            CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.Black, strokeWidth = 2.dp)
+                                            CircularProgressIndicator(
+                                                modifier = Modifier.size(24.dp),
+                                                color = Color.Black,
+                                                strokeWidth = 2.dp
+                                            )
                                         } else {
                                             Icon(
                                                 imageVector = Icons.Default.PhotoCamera,
@@ -303,9 +422,10 @@ fun LandmarkRecognitionScreen(
                     }
                 }
             } else {
-                Box(modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black)
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black)
                 )
             }
 
@@ -332,20 +452,68 @@ fun LandmarkRecognitionScreen(
                         val color = Color.White.copy(alpha = alpha)
 
                         // Левый верхний угол
-                        drawLine(color, Offset(0f, 0f), Offset(cornerLength, 0f), strokeWidth, StrokeCap.Round)
-                        drawLine(color, Offset(0f, 0f), Offset(0f, cornerLength), strokeWidth, StrokeCap.Round)
+                        drawLine(
+                            color,
+                            Offset(0f, 0f),
+                            Offset(cornerLength, 0f),
+                            strokeWidth,
+                            StrokeCap.Round
+                        )
+                        drawLine(
+                            color,
+                            Offset(0f, 0f),
+                            Offset(0f, cornerLength),
+                            strokeWidth,
+                            StrokeCap.Round
+                        )
 
                         // Правый верхний угол
-                        drawLine(color, Offset(size.width, 0f), Offset(size.width - cornerLength, 0f), strokeWidth, StrokeCap.Round)
-                        drawLine(color, Offset(size.width, 0f), Offset(size.width, cornerLength), strokeWidth, StrokeCap.Round)
+                        drawLine(
+                            color,
+                            Offset(size.width, 0f),
+                            Offset(size.width - cornerLength, 0f),
+                            strokeWidth,
+                            StrokeCap.Round
+                        )
+                        drawLine(
+                            color,
+                            Offset(size.width, 0f),
+                            Offset(size.width, cornerLength),
+                            strokeWidth,
+                            StrokeCap.Round
+                        )
 
                         // Левый нижний угол
-                        drawLine(color, Offset(0f, size.height), Offset(cornerLength, size.height), strokeWidth, StrokeCap.Round)
-                        drawLine(color, Offset(0f, size.height), Offset(0f, size.height - cornerLength), strokeWidth, StrokeCap.Round)
+                        drawLine(
+                            color,
+                            Offset(0f, size.height),
+                            Offset(cornerLength, size.height),
+                            strokeWidth,
+                            StrokeCap.Round
+                        )
+                        drawLine(
+                            color,
+                            Offset(0f, size.height),
+                            Offset(0f, size.height - cornerLength),
+                            strokeWidth,
+                            StrokeCap.Round
+                        )
 
                         // Правый нижний угол
-                        drawLine(color, Offset(size.width, size.height), Offset(size.width - cornerLength, size.height), strokeWidth, StrokeCap.Round)
-                        drawLine(color, Offset(size.width, size.height), Offset(size.width, size.height - cornerLength), strokeWidth, StrokeCap.Round)
+                        drawLine(
+                            color,
+                            Offset(size.width, size.height),
+                            Offset(size.width - cornerLength, size.height),
+                            strokeWidth,
+                            StrokeCap.Round
+                        )
+                        drawLine(
+                            color,
+                            Offset(size.width, size.height),
+                            Offset(size.width, size.height - cornerLength),
+                            strokeWidth,
+                            StrokeCap.Round
+                        )
                     }
 
                     Text(

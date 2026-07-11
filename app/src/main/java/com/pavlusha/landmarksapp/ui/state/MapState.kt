@@ -19,7 +19,10 @@ data class MapState(
     val lastCameraPosition: CameraPositionData? = null,
 
     val currentRoute: RouteDomainModel? = null,
-    val distanceToSelected: Float? = null
+    val distanceToSelected: Float? = null,
+
+    val isVisiting: Boolean = false,
+    val visitStartTime: Long? = null
 )
 
 data class CameraPositionData(

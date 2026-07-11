@@ -3,8 +3,10 @@ package com.pavlusha.landmarksapp.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pavlusha.domain.TResult
+import com.pavlusha.domain.model.LandmarkDomainModel
 import com.pavlusha.domain.model.LandmarkSource
 import com.pavlusha.domain.usecase.GetFavoriteLandmarksUseCase
+import com.pavlusha.domain.usecase.GetWikipediaInfoUseCase
 import com.pavlusha.domain.usecase.ToggleFavoriteUseCase
 import com.pavlusha.landmarksapp.R
 import com.pavlusha.landmarksapp.ui.SingleFlowEvent
@@ -20,7 +22,8 @@ import kotlinx.coroutines.launch
 
 class FavoritesViewModel(
     private val getFavoriteLandmarksUseCase: GetFavoriteLandmarksUseCase,
-    private val toggleFavoriteUseCase: ToggleFavoriteUseCase
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
+    private val getWikipediaInfoUseCase: GetWikipediaInfoUseCase
 ) : ViewModel() {
     private val _state = MutableStateFlow(FavoritesState())
     val state: StateFlow<FavoritesState> = _state.asStateFlow()
@@ -49,11 +52,36 @@ class FavoritesViewModel(
             when (result) {
                 is TResult.Success -> {
                     _state.update { it.copy(isLoading = false, landmarks = result.data) }
+
+                    loadWikipediaImagesForList(result.data)
                 }
                 is TResult.Error -> {
                     val errorRes = result.exception?.parseToResource() ?: R.string.error_unknown
                     _state.update { it.copy(isLoading = false, error = errorRes) }
                     _event.emit(FavoritesEvent.ShowToast(errorRes))
+                }
+            }
+        }
+    }
+
+    private fun loadWikipediaImagesForList(landmarks: List<LandmarkDomainModel>) {
+        landmarks.forEach { landmark ->
+            if (!landmark.localMainImagePath.isNullOrEmpty()) return@forEach
+
+            viewModelScope.launch {
+                val wikiResult = getWikipediaInfoUseCase(landmark.name)
+
+                if (wikiResult is TResult.Success) {
+                    val imageUrl = wikiResult.data.thumbnailUrl ?: wikiResult.data.originalImageUrl
+
+                    if (imageUrl != null) {
+                        _state.update { currentState ->
+                            val updatedList = currentState.landmarks.map { item ->
+                                if (item.id == landmark.id) item.copy(thumbnailUrl = imageUrl) else item
+                            }
+                            currentState.copy(landmarks = updatedList)
+                        }
+                    }
                 }
             }
         }

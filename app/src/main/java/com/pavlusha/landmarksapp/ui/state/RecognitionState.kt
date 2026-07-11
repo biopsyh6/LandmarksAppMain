@@ -7,7 +7,9 @@ data class RecognitionState(
     val mode: RecognitionMode = RecognitionMode.SCANNING,
     val recognizedLandmark: LandmarkDomainModel? = null,
     val arContent: ARContentDomainModel? = null,
-    val isAnalyzing: Boolean = false
+    val isAnalyzing: Boolean = false,
+    val distanceMeters: Float? = null,
+    val navigationBearing: Float? = null
 )
 
 enum class RecognitionMode {

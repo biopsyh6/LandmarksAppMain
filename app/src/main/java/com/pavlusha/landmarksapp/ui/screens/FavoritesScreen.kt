@@ -48,6 +48,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.pavlusha.domain.model.LandmarkDomainModel
 import com.pavlusha.landmarksapp.ui.event.FavoritesEvent
 import com.pavlusha.landmarksapp.ui.intent.FavoritesIntent
@@ -147,6 +148,13 @@ fun FavoriteLandmarkCard(
     onClick: () -> Unit,
     onRemoveFavorite: () -> Unit
 ) {
+    val context = LocalContext.current
+
+    val displayImageUrl = landmark.thumbnailUrl
+        ?: landmark.mainImageUrl
+        ?: landmark.remoteMainImageUrl
+        ?: landmark.localMainImagePath
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -161,7 +169,11 @@ fun FavoriteLandmarkCard(
                 .height(100.dp)
         ) {
             AsyncImage(
-                model = landmark.remoteMainImageUrl ?: landmark.localMainImagePath ?: landmark.thumbnailUrl,
+                model = ImageRequest.Builder(context)
+                    .data(displayImageUrl)
+                    .crossfade(true)
+                    .addHeader("User-Agent", "LandmarkARApp/1.0 (pavelbrutalll@gmail.com)")
+                    .build(),
                 contentDescription = landmark.name,
                 modifier = Modifier
                     .size(100.dp)

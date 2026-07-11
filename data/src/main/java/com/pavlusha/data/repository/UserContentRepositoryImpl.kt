@@ -112,6 +112,28 @@ class UserContentRepositoryImpl(
         }
     }
 
+    override suspend fun getUserVisitHistory(userId: String): TResult<List<VisitHistoryDomainModel>, AppExceptionDomainModel> {
+        return try {
+            try {
+                val remoteVisits = userRemoteDataSource.getVisitHistory(userId)
+                if (remoteVisits.isNotEmpty()) {
+                    val entitiesToSave = remoteVisits.map { remoteModel ->
+                        val domainModel = UserContentRemoteDataMapper.toDomainFromData(remoteModel)
+                        UserContentLocalDataMapper.fromDomainToData(domainModel)
+                    }
+                    userContentDao.insertVisits(entitiesToSave)
+                }
+            } catch (e: Exception) { e.printStackTrace() }
+
+            val localVisits = userContentDao.getAllVisitsFlow(userId).first()
+            val domainVisits = localVisits.map { UserContentLocalDataMapper.toDomainFromData(it) }
+
+            TResult.Success(domainVisits)
+        } catch (e: Exception) {
+            TResult.Error(e.toAppExceptionDomainModel())
+        }
+    }
+
     override suspend fun saveARPhoto(
         landmarkId: String,
         userId: String,

@@ -47,7 +47,9 @@ class AuthRepositoryImpl(
         return if (localUser != null) {
             UserLocalDataMapper.toDomainFromData(localUser)
         } else {
-            UserDataMapper.toDomainFromFirebase(firebaseUser)
+            val domainUser = UserDataMapper.toDomainFromFirebase(firebaseUser)
+            userDao.insertOrUpdateUser(UserLocalDataMapper.fromDomainToData(domainUser))
+            domainUser
         }
     }
 
@@ -65,7 +67,7 @@ class AuthRepositoryImpl(
             userRemoteDataSource.saveUserProfile(remoteUser)
 
             val localUser = UserLocalDataMapper.fromDomainToData(domainUser)
-            userDao.insertUser(localUser)
+            userDao.insertOrUpdateUser(localUser)
 
             TResult.Success(domainUser)
         } catch (e: Exception) {
@@ -91,7 +93,7 @@ class AuthRepositoryImpl(
                 fallbackUser
             }
 
-            userDao.insertUser(UserLocalDataMapper.fromDomainToData(domainUser))
+            userDao.insertOrUpdateUser(UserLocalDataMapper.fromDomainToData(domainUser))
             TResult.Success(domainUser)
         } catch (e: Exception) {
             TResult.Error(e.toAppExceptionDomainModel())
@@ -141,7 +143,7 @@ class AuthRepositoryImpl(
             userRemoteDataSource.saveUserProfile(remoteUser)
 
             val localUser = UserLocalDataMapper.fromDomainToData(user)
-            userDao.insertUser(localUser)
+            userDao.insertOrUpdateUser(localUser)
 
             TResult.Success(Unit)
         } catch (e: Exception) {

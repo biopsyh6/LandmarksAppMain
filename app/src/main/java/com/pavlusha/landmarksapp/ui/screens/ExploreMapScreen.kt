@@ -526,7 +526,7 @@ fun LandmarkInfoCard(
                 Text(
                     text = formatDistance(distance),
                     style = MaterialTheme.typography.labelLarge,
-                    color = colorResource(id = R.color.red),
+                    color = colorResource(id = R.color.black),
                     fontWeight = FontWeight.Bold
                 )
             }
