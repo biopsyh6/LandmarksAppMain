@@ -1,3 +1,34 @@
 <resources>
     <string name="app_name">LandmarksApp</string>
+
+    <string name="error_no_internet">Проблемы с интернетом. Проверьте подключение.</string>
+    <string name="error_no_auth">Требуется авторизация.</string>
+    <string name="error_not_found">Данные не найдены.</string>
+    <string name="error_server">Ошибка на стороне сервера. Попробуйте позже.</string>
+    <string name="error_weak_password">Пароль слишком простой. Используйте минимум 6 символов.</string>
+    <string name="error_user_exists">Пользователь с таким email уже зарегистрирован.</string>
+    <string name="error_invalid_credentials">Неверный логин или пароль.</string>
+    <string name="error_unknown">Произошла непредвиденная ошибка.</string>
+
+    <string name="error_passwords_dont_match">Пароли не совпадают</string>
+    <string name="success_reset_link_sent">Ссылка для сброса пароля отправлена на почту</string>
+    <string name="error_invalid_email">Введите корректный адрес электронной почты</string>
+
+    <string name="error_access_denied">Нет разрешения на доступ к местоположению. Пожалуйста, включите его в настройках.</string>
+    <string name="error_location_disabled">Геолокация на устройстве выключена. Включите GPS для работы с картой.</string>
+
+    <string name="error_download_failed">Не удалось загрузить данные. Проверьте сеть.</string>
+    <string name="error_insufficient_storage">Недостаточно места на устройстве для загрузки карт или моделей.</string>
+    <string name="error_model_failed">Ошибка при анализе изображения. Попробуйте еще раз.</string>
+
+    <string name="error_empty_search">По вашему запросу ничего не найдено. Попробуйте изменить фильтры или текст.</string>
+    <string name="error_search_limit">Превышен лимит запросов на поиск. Попробуйте позже.</string>
+
+
+
+
+    <string name="arrived_message">Вы прибыли.</string>
+    <string name="profile_saved">Профиль сохранен</string>
+    <string name="note_saved">Заметка сохранена</string>
+
 </resources>

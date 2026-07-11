@@ -24,4 +24,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "LandmarksApp"
 include(":app")
- 
+include(":data")
+include(":domain")
